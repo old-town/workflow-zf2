@@ -1,0 +1,54 @@
+{
+  "name": "old-town/workflow-zf2",
+  "description": "Integration Workflow and ZF2",
+  "type": "library",
+  "keywords": [
+    "zf2",
+    "workflow",
+    "zf2 module"
+  ],
+  "license": "GPL-3.0",
+  "authors": [
+    {
+      "name": "Malofeykin Andrey",
+      "email": "and-rey2@yandex.ru"
+    }
+  ],
+  "require": {
+    "php": ">=5.5.0",
+    "zendframework/zend-modulemanager": "~2.4.0",
+    "zendframework/zend-mvc": "~2.4.0",
+    "zendframework/zend-stdlib": "~2.4.0",
+    "zendframework/zend-servicemanager": "~2.4.0"
+  },
+  "require-dev": {
+    "fabpot/php-cs-fixer": "1.9.1",
+    "phpunit/phpunit": "4.7.7",
+    "phpunit/phpcov": "2.0.1",
+    "zendframework/zend-loader": "~2.4.0",
+    "zendframework/zend-test": "~2.4.0",
+    "zendframework/zend-serializer": "~2.4.0",
+    "zendframework/zend-log": "~2.4.0",
+    "zendframework/zend-i18n": "~2.4.0",
+    "zendframework/zend-json": "~2.4.0",
+    "zendframework/zend-config": "~2.4.0",
+    "zendframework/zend-version": "~2.4.0",
+    "satooshi/php-coveralls": "dev-master"
+  },
+  "autoload": {
+    "psr-4": {
+      "OldTown\\Workflow\\ZF2\\": "src/"
+    },
+    "classmap": [
+      "./Module.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "OldTown\\Workflow\\ZF2\\PhpUnit\\Test\\": "test/phpunit/tests"
+    },
+    "classmap": [
+      "./test/phpunit/Bootstrap.php"
+    ]
+  }
+}

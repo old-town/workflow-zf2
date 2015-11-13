@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<phpunit
+        bootstrap="./test/phpunit/Bootstrap.php"
+        colors="true"
+        convertErrorsToExceptions="true"
+        convertNoticesToExceptions="true"
+        convertWarningsToExceptions="true"
+        verbose="true"
+        stopOnFailure="false"
+        processIsolation="false"
+        backupGlobals="false"
+        syntaxCheck="true"
+        >
+    <testsuites>
+        <testsuite name="Integration Workflow and ZF2">
+            <directory>./test/phpunit/tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <blacklist>
+            <directory>./vendor</directory>
+            <directory>./test</directory>
+        </blacklist>
+    </filter>
+    <logging>
+        <log type="coverage-php" target="./.reports/coverage/coverage-phpunit.cov"/>
+    </logging>
+
+</phpunit>

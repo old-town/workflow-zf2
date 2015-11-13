@@ -1,0 +1,47 @@
+language: php
+
+sudo: false
+
+matrix:
+  fast_finish: true
+  include:
+    - php: 5.5
+      env:
+        - EXECUTE_CS_CHECK=true
+    - php: 5.6
+      env:
+        - EXECUTE_TEST_COVERALLS=true
+    - php: 7
+    - php: hhvm
+  allow_failures:
+    - php: 7
+    - php: hhvm
+      env:
+        - DISABLE_ADD_TRAVIS_PHP_INI=true
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+before_install:
+  - if [[ $EXECUTE_TEST_COVERALLS != 'true' ]]; then phpenv config-rm xdebug.ini || return 0 ; fi
+  - if [[ $DISABLE_ADD_TRAVIS_PHP_INI != 'true' ]]; then phpenv config-add .travis/php.ini || return 0 ; fi
+  - composer self-update
+  - if [[ $EXECUTE_TEST_COVERALLS == 'true' ]]; then composer require --dev ; fi
+
+install:
+  - travis_retry composer install --no-interaction --ignore-platform-reqs
+
+script:
+  - if [[ $EXECUTE_TEST_COVERALLS == 'true' ]]; then ./vendor/bin/phpunit --configuration $TRAVIS_BUILD_DIR/phpunit.xml.travis --coverage-php $TRAVIS_BUILD_DIR/.reports/coverage/coverage-phpunit.cov; fi
+  - if [[ $EXECUTE_TEST_COVERALLS != 'true' ]]; then ./vendor/bin/phpunit --configuration $TRAVIS_BUILD_DIR/phpunit.xml.travis ; fi
+  - if [[ $EXECUTE_CS_CHECK == 'true' ]]; then  ./vendor/bin/php-cs-fixer fix -v --diff --dry-run --config-file ./.php_cs ; fi
+
+after_script:
+  - if [[ $EXECUTE_TEST_COVERALLS == 'true' ]]; then ./vendor/bin/phpcov merge --clover .reports/clover.xml .reports/coverage ; fi
+  - if [[ $EXECUTE_TEST_COVERALLS == 'true' ]]; then ./vendor/bin/coveralls -v --config .coveralls.yml ; fi
+
+
+notifications:
+  email:
+  - and-rey2@yandex.ru
