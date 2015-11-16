@@ -15,29 +15,63 @@ use Zend\Stdlib\AbstractOptions;
 class ModuleOptions extends AbstractOptions
 {
     /**
-     * Конфигурация менеджера
+     * Зарегестрированные workflow
      *
      * @var  array
      */
-    protected $manager;
+    protected $workflows;
+
+    /**
+     * @var array
+     */
+    protected $configuration;
+
+    /**
+     * Имя сервиса/класса являющегося хранилищем состояния workflow
+     *
+     * @var string
+     */
+    protected $persistenceName;
+
 
     /**
      * @return array
      */
-    public function getManager()
+    public function getWorkflows()
     {
-        return $this->manager;
+        return $this->workflows;
     }
 
     /**
-     * @param array $manager
+     * @param array $workflows
      *
      * @return $this
      */
-    public function setManager(array $manager)
+    public function setWorkflows(array $workflows)
     {
-        $this->manager = $manager;
+        $this->workflows = $workflows;
 
         return $this;
     }
+
+    /**
+     * @return array
+     */
+    public function getConfiguration()
+    {
+        return $this->configuration;
+    }
+
+    /**
+     * @param array $configuration
+     *
+     * @return $this
+     */
+    public function setConfiguration(array $configuration)
+    {
+        $this->configuration = $configuration;
+
+        return $this;
+    }
+
 }

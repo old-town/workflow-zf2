@@ -16,7 +16,6 @@ use Zend\ModuleManager\ModuleManagerInterface;
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\ModuleManager\Feature\ConfigProviderInterface;
 use Zend\ModuleManager\Feature\BootstrapListenerInterface;
-use Zend\ModuleManager\Feature\InitProviderInterface;
 
 
 /**
@@ -27,8 +26,7 @@ use Zend\ModuleManager\Feature\InitProviderInterface;
 class Module implements
     BootstrapListenerInterface,
     ConfigProviderInterface,
-    AutoloaderProviderInterface,
-    InitProviderInterface
+    AutoloaderProviderInterface
 {
 
     /**
@@ -68,31 +66,10 @@ class Module implements
         return array(
             'Zend\Loader\StandardAutoloader' => array(
                 'namespaces' => array(
-                    __NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
+                    __NAMESPACE__ => __DIR__ . '/src/',
                 ),
             ),
         );
     }
 
-    /**
-     *
-     * @param ModuleManagerInterface $manager
-     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
-     * @throws Exception\ErrorInitModuleException
-     */
-    public function init(ModuleManagerInterface $manager)
-    {
-        if (!$manager instanceof ModuleManager) {
-            $errMsg =sprintf('Менеджер модулей должен реализовывать %s', ModuleManager::class);
-            throw new Exception\ErrorInitModuleException($errMsg);
-        }
-        /** @var ModuleManager $manager */
-
-        /** @var ServiceLocatorInterface $sm */
-        $sm = $manager->getEvent()->getParam('ServiceManager');
-
-        /** @var ServiceListenerInterface $serviceListener */
-        $serviceListener = $sm->get('ServiceListener');
-
-    }
 } 

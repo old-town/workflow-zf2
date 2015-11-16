@@ -57,7 +57,8 @@ class Bootstrap
                     'autoregister_zf' => true,
                     'namespaces' => [
                         'OldTown\\Workflow\\ZF2' => __DIR__ . '/../../src/',
-                        __NAMESPACE__ => __DIR__ . '/tests/'
+                        __NAMESPACE__ => __DIR__ . '/tests/',
+                        'OldTown\\Workflow\\ZF2\\PhpUnit\\TestData' => __DIR__ . '/_files',
                     ]
                 ]
             ]);
