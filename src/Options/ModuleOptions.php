@@ -15,41 +15,35 @@ use Zend\Stdlib\AbstractOptions;
 class ModuleOptions extends AbstractOptions
 {
     /**
-     * Зарегестрированные workflow
+     * Менеджеры workflow
      *
      * @var  array
      */
-    protected $workflows;
+    protected $managers;
 
     /**
+     * Конфигурации для менеджеров
+     *
      * @var array
      */
-    protected $configuration;
-
-    /**
-     * Имя сервиса/класса являющегося хранилищем состояния workflow
-     *
-     * @var string
-     */
-    protected $persistenceName;
-
+    protected $configurations;
 
     /**
      * @return array
      */
-    public function getWorkflows()
+    public function getManagers()
     {
-        return $this->workflows;
+        return $this->managers;
     }
 
     /**
-     * @param array $workflows
+     * @param array $managers
      *
      * @return $this
      */
-    public function setWorkflows(array $workflows)
+    public function setManagers(array $managers)
     {
-        $this->workflows = $workflows;
+        $this->managers = $managers;
 
         return $this;
     }
@@ -57,21 +51,59 @@ class ModuleOptions extends AbstractOptions
     /**
      * @return array
      */
-    public function getConfiguration()
+    public function getConfigurations()
     {
-        return $this->configuration;
+        return $this->configurations;
     }
 
     /**
-     * @param array $configuration
+     * @param array $configurations
      *
      * @return $this
      */
-    public function setConfiguration(array $configuration)
+    public function setConfigurations(array $configurations)
     {
-        $this->configuration = $configuration;
+        $this->configurations = $configurations;
 
         return $this;
     }
 
+    /**
+     * Возвращает настройки менеджера по его имени
+     *
+     * @param string $managerName
+     *
+     * @return ManagerOptions
+     *
+     * @throws Exception\InvalidManagerNameException
+     */
+    public function getManagerOptions($managerName)
+    {
+        if (!array_key_exists($managerName, $this->managers)) {
+            $errMsg = sprintf('Invalid manager name %s', $managerName);
+            throw new Exception\InvalidManagerNameException($errMsg);
+        }
+
+        return new ManagerOptions($this->managers[$managerName]);
+    }
+
+
+    /**
+     * Возвращает настройки с заданным именем
+     *
+     * @param string $configurationName
+     *
+     * @return ConfigurationOptions
+     *
+     * @throws Exception\InvalidConfigurationNameException
+     */
+    public function getConfigurationOptions($configurationName)
+    {
+        if (!array_key_exists($configurationName, $this->configurations)) {
+            $errMsg = sprintf('Invalid configuration name %s', $configurationName);
+            throw new Exception\InvalidConfigurationNameException($errMsg);
+        }
+
+        return new ConfigurationOptions($this->configurations[$configurationName]);
+    }
 }

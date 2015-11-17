@@ -1,9 +1,15 @@
 <?php
+/**
+ * @link    https://github.com/old-town/workflow-zf2
+ * @author  Malofeykin Andrey  <and-rey2@yandex.ru>
+ */
+namespace OldTown\Workflow\ZF2;
 
-
+use OldTown\Workflow\Basic\BasicWorkflow;
 use OldTown\Workflow\Spi\Memory\MemoryWorkflowStore;
 use OldTown\Workflow\Loader\XmlWorkflowFactory;
 use OldTown\Workflow\Util\DefaultVariableResolver;
+
 
 return [
     'workflow_zf2'    => [
@@ -33,8 +39,9 @@ return [
 
 
         'managers' => [
-            'test_create_manager' => [
+            'default' => [
                 'configuration' => 'default',
+                'name' => BasicWorkflow::class,
                 'workflows' => [
 
                 ]

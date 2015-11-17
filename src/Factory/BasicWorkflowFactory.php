@@ -5,17 +5,13 @@
  */
 namespace  OldTown\Workflow\ZF2\Factory;
 
-
 use Zend\Mvc\Application;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\MutableCreationOptionsInterface;
 use Zend\ServiceManager\MutableCreationOptionsTrait;
 use Zend\ServiceManager\ServiceLocatorInterface;
-use OldTown\Workflow\ZF2\Options\ModuleOptions;
 use OldTown\Workflow\Basic\BasicWorkflow;
 use OldTown\Workflow\ZF2\Event\CallerEvent;
-use OldTown\Workflow\ZF2\Workflow\Config\ArrayConfiguration;
-
 
 /**
  * Class PluginMessageAbstractFactory
@@ -25,7 +21,6 @@ use OldTown\Workflow\ZF2\Workflow\Config\ArrayConfiguration;
 class BasicWorkflowFactory implements FactoryInterface, MutableCreationOptionsInterface
 {
     use MutableCreationOptionsTrait;
-
 
     /**
      * @param ServiceLocatorInterface $serviceLocator
@@ -38,12 +33,11 @@ class BasicWorkflowFactory implements FactoryInterface, MutableCreationOptionsIn
      */
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
-
-
         $caller = false;
-        if ($serviceLocator->has('Application')) {
+        $appSm = method_exists($serviceLocator, 'getServiceLocator') ? call_user_func([$serviceLocator, 'getServiceLocator']) : null;
+        if ($appSm && $appSm->has('Application')) {
             /** @var Application $app */
-            $app = $serviceLocator->get('Application');
+            $app = $appSm->get('Application');
             $callerEvent = new CallerEvent();
             $app->getEventManager()->trigger(CallerEvent::EVENT_RESOLVE_CALLER, $callerEvent);
             if ($callerEvent->getCaller()) {
@@ -51,30 +45,8 @@ class BasicWorkflowFactory implements FactoryInterface, MutableCreationOptionsIn
             }
         }
 
-        /** @var ModuleOptions $moduleOptions */
-        $moduleOptions = $serviceLocator->get(ModuleOptions::class);
-        $config = $this->buildWorkflowConfig($moduleOptions);
-
         $w = new BasicWorkflow($caller);
-        $w->setConfiguration($config);
-
-
-        //$w->initialize();
 
         return $w;
-    }
-
-    /**
-     * @param ModuleOptions $moduleOptions
-     *
-     * @return ArrayConfiguration
-     */
-    protected function buildWorkflowConfig(ModuleOptions $moduleOptions)
-    {
-//        $options = $moduleOptions->
-//        $config = new ArrayConfiguration();
-
-
-        return $config;
     }
 }

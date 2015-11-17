@@ -8,7 +8,6 @@ namespace  OldTown\Workflow\ZF2\PhpUnit\Test\Manager;
 use OldTown\Workflow\ZF2\PhpUnit\TestData\TestPaths;
 use Zend\Test\PHPUnit\Controller\AbstractHttpControllerTestCase;
 use OldTown\Workflow\WorkflowInterface;
-use OldTown\Workflow\Basic\BasicWorkflow;
 
 
 /**
@@ -34,12 +33,11 @@ class CreateWorkflowTest extends AbstractHttpControllerTestCase
         $this->setApplicationConfig($applicationConfig);
 
         /** @var WorkflowInterface $workflow */
-        $workflow = $this->getApplicationServiceLocator()->get(BasicWorkflow::class);
+        $workflow = $this->getApplicationServiceLocator()->get('workflow.manager.test_create_manager');
 
-        $workflow->getWorkflowDescriptor('test');
+        //$workflow->getWorkflowDescriptor('test');
 
 
         static::assertInstanceOf(WorkflowInterface::class, $workflow);
-
     }
 }

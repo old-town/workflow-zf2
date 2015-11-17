@@ -5,7 +5,6 @@
  */
 namespace  OldTown\Workflow\ZF2\Event;
 
-
 use Zend\EventManager\Event;
 
 /**
@@ -44,5 +43,4 @@ class CallerEvent extends Event
 
         return $this;
     }
-
 }

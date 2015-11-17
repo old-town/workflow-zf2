@@ -5,7 +5,6 @@
  */
 namespace OldTown\Workflow\ZF2\Workflow\Config;
 
-
 use OldTown\Workflow\Config\ConfigurationInterface;
 use OldTown\Workflow\Loader\WorkflowDescriptor;
 use Psr\Http\Message\UriInterface;
@@ -19,7 +18,6 @@ use OldTown\Workflow\Loader\WorkflowFactoryInterface;
  */
 class  ArrayConfiguration implements ConfigurationInterface
 {
-
     /**
      * Флаг определяющий было ли иницилизированно workflow
      *
@@ -39,7 +37,6 @@ class  ArrayConfiguration implements ConfigurationInterface
      */
     public function __construct($options)
     {
-
     }
 
     /**
@@ -128,6 +125,4 @@ class  ArrayConfiguration implements ConfigurationInterface
 
         return $this;
     }
-
-
 }
