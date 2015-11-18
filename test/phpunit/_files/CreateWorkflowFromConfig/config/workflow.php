@@ -1,8 +1,8 @@
 <?php
 
-
+use OldTown\Workflow\Basic\BasicWorkflow;
 use OldTown\Workflow\Spi\Memory\MemoryWorkflowStore;
-use OldTown\Workflow\Loader\XmlWorkflowFactory;
+use OldTown\Workflow\Loader\ArrayWorkflowFactory;
 use OldTown\Workflow\Util\DefaultVariableResolver;
 
 return [
@@ -16,17 +16,17 @@ return [
                     ]
                 ],
                 'factory' => [
-                    'name' => XmlWorkflowFactory::class,
+                    'name' => ArrayWorkflowFactory::class,
                     'options' => [
-
+                        'reload' => true,
+                        'workflows' => [
+                            'test' => [
+                                'location' => __DIR__ . '/../../../../../../../../config/workflow/example.xml'
+                            ]
+                        ]
                     ]
                 ],
-                'resolver' => [
-                    'name' => DefaultVariableResolver::class,
-                    'options' => [
-
-                    ]
-                ]
+                'resolver' => DefaultVariableResolver::class,
             ]
         ],
 
@@ -35,9 +35,7 @@ return [
         'managers' => [
             'test_create_manager' => [
                 'configuration' => 'default',
-                'workflows' => [
-
-                ]
+                'name' => BasicWorkflow::class
             ]
         ]
     ]

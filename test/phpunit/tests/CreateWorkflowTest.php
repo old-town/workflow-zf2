@@ -35,9 +35,6 @@ class CreateWorkflowTest extends AbstractHttpControllerTestCase
         /** @var WorkflowInterface $workflow */
         $workflow = $this->getApplicationServiceLocator()->get('workflow.manager.test_create_manager');
 
-        //$workflow->getWorkflowDescriptor('test');
-
-
         static::assertInstanceOf(WorkflowInterface::class, $workflow);
     }
 }

@@ -50,12 +50,6 @@ class ConfigurationOptions extends AbstractOptions
      */
     protected $factoryOptions;
 
-    /**
-     * Настройки сервиса работы с переменными в workflow
-     *
-     * @var ConfigurationServiceOptions
-     */
-    protected $resolverOptions;
 
     /**
      * @return array
@@ -108,51 +102,70 @@ class ConfigurationOptions extends AbstractOptions
     }
 
     /**
-     * @param array $resolver
+     * @param string $resolver
      *
      * @return $this
      */
-    public function setResolver(array $resolver)
+    public function setResolver($resolver)
     {
         $this->resolver = $resolver;
-        $this->resolverOptions = null;
 
         return $this;
     }
 
     /**
      * @return ConfigurationServiceOptions
+     *
+     * @throws Exception\InvalidPersistenceConfigException
      */
     public function getPersistenceOptions()
     {
         if ($this->persistenceOptions) {
             return $this->persistenceOptions;
         }
+        if (!$this->hasPersistenceOptions()) {
+            $errMsg = 'Persistence options not specified';
+            throw new Exception\InvalidPersistenceConfigException($errMsg);
+        }
         $this->persistenceOptions = new ConfigurationServiceOptions($this->persistence);
         return $this->persistenceOptions;
     }
 
     /**
+     * Определяет есть ли настройки для хранилища
+     *
+     * @return bool
+     */
+    public function hasPersistenceOptions()
+    {
+        return is_array($this->persistence);
+    }
+
+    /**
      * @return ConfigurationServiceOptions
+     *
+     * @throws Exception\InvalidFactoryConfigException
      */
     public function getFactoryOptions()
     {
         if ($this->factoryOptions) {
             return $this->factoryOptions;
         }
+        if (!$this->hasFactoryOptions()) {
+            $errMsg = 'Factory options not specified';
+            throw new Exception\InvalidFactoryConfigException($errMsg);
+        }
         $this->factoryOptions = new ConfigurationServiceOptions($this->factory);
         return $this->factoryOptions;
     }
 
     /**
-     * @return ConfigurationServiceOptions
+     * Определяет есть ли настройки для фабрики
+     *
+     * @return bool
      */
-    public function getResolverOptions()
+    public function hasFactoryOptions()
     {
-        if ($this->resolverOptions) {
-            return $this->resolverOptions;
-        }
-        $this->resolverOptions = new ConfigurationServiceOptions($this->resolver);
-        return $this->resolverOptions;
+        return is_array($this->factory);
     }
 }

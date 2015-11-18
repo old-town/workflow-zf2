@@ -6,6 +6,7 @@
 namespace OldTown\Workflow\ZF2;
 
 use OldTown\Workflow\Basic\BasicWorkflow;
+use OldTown\Workflow\Loader\ArrayWorkflowFactory;
 use OldTown\Workflow\Spi\Memory\MemoryWorkflowStore;
 use OldTown\Workflow\Loader\XmlWorkflowFactory;
 use OldTown\Workflow\Util\DefaultVariableResolver;
@@ -22,29 +23,26 @@ return [
                     ]
                 ],
                 'factory' => [
-                    'name' => XmlWorkflowFactory::class,
+                    'name' => ArrayWorkflowFactory::class,
                     'options' => [
-
+                        'reload' => true,
+                        'workflows' => [
+                            'test' => [
+                                'location' => __DIR__ . '/../../../../../../../../config/workflow/example.xml'
+                            ]
+                        ]
                     ]
                 ],
-                'resolver' => [
-                    'name' => DefaultVariableResolver::class,
-                    'options' => [
-
-                    ]
-                ]
+                'resolver' => DefaultVariableResolver::class,
             ]
         ],
 
 
 
         'managers' => [
-            'default' => [
+            'test_create_manager' => [
                 'configuration' => 'default',
-                'name' => BasicWorkflow::class,
-                'workflows' => [
-
-                ]
+                'name' => BasicWorkflow::class
             ]
         ]
     ]

@@ -6,18 +6,13 @@
 namespace OldTown\Workflow\ZF2;
 
 
-use Zend\ModuleManager\Listener\ServiceListenerInterface;
-use Zend\ModuleManager\ModuleManager;
-use Zend\ModuleManager\ModuleManagerInterface;
 use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
 use Zend\EventManager\EventInterface;
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\ModuleManager\Feature\ConfigProviderInterface;
 use Zend\ModuleManager\Feature\BootstrapListenerInterface;
-use Zend\ModuleManager\Feature\InitProviderInterface;
-use OldTown\Workflow\ZF2\Manager\WorkflowPluginManager;
-use OldTown\Workflow\ZF2\Manager\WorkflowProviderInterface;
+
 
 
 /**
@@ -28,8 +23,7 @@ use OldTown\Workflow\ZF2\Manager\WorkflowProviderInterface;
 class Module implements
     BootstrapListenerInterface,
     ConfigProviderInterface,
-    AutoloaderProviderInterface,
-    InitProviderInterface
+    AutoloaderProviderInterface
 {
 
     /**
@@ -75,26 +69,7 @@ class Module implements
         );
     }
 
-    /**
-     * @param ModuleManagerInterface $manager
-     *
-     * @throws Exception\ErrorInitModuleException
-     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
-     */
-    public function init(ModuleManagerInterface $manager)
-    {
-        /** @var ModuleManager $manager */
-        $sm = $manager->getEvent()->getParam('ServiceManager');
 
-        /** @var ServiceListenerInterface $serviceListener */
-        $serviceListener = $sm->get('ServiceListener');
-        $serviceListener->addServiceManager(
-            WorkflowPluginManager::class,
-            'workflow_manager',
-            WorkflowProviderInterface::class,
-            'getWorkflowManagerConfig'
-        );
-    }
 
 
 
