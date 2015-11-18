@@ -74,3 +74,6 @@ return [
 
  ### Структура конфига ###
  
+ * Секция managers
+ * Секция configurations
+ 
