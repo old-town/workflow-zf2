@@ -9,7 +9,12 @@
 менеджера workflow в конфигурационных файлах приложения. В качестве примера можно использовать файл [workflow.config.dist](config/workflow.config.dist).
 
 ## Описание структуры конфига ##
+
+Все настройки модуля находятся в секции workflow_zf2
+
 ### Пример конфига ###
+
+
 ```php
 use OldTown\Workflow\Basic\BasicWorkflow;
 use OldTown\Workflow\Spi\Memory\MemoryWorkflowStore;
