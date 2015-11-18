@@ -8,8 +8,8 @@
 Для работый работы [AbstractWorkflowFactory](src/Factory/AbstractWorkflowFactory.php) необходимо описать конфигурацию
 менеджера workflow в конфигурационных файлах приложения. В качестве примера можно использовать файл [workflow.config.dist](config/workflow.config.dist).
 
-Описание структуры конфига
-* Пример конфига
+## Описание структуры конфига ##
+### Пример конфига ###
 ```php
 use OldTown\Workflow\Basic\BasicWorkflow;
 use OldTown\Workflow\Spi\Memory\MemoryWorkflowStore;
@@ -66,7 +66,5 @@ return [
     ]
 ];
 ```
-
-* Описание конфига(Все настройки модуля находятся в секции workflow_zf2)
-** Секция managers. Описание зарегестрированных менеджеров workflow. Ключем является имя мендежра.
-*** Настройки конкретного менеджера
+ ### Структура конфига ###
+ 
