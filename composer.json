@@ -14,7 +14,7 @@
       "email": "and-rey2@yandex.ru"
     }
   ],
-  "minimum-stability": "alpha",
+  "minimum-stability": "dev",
   "require": {
     "php": ">=5.5.0",
     "old-town/workflow": "dev-dev",
