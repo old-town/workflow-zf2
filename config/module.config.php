@@ -13,7 +13,7 @@ use OldTown\Workflow\ZF2\Factory\AbstractWorkflowFactory;
 use OldTown\Workflow\Basic\BasicWorkflow;
 use OldTown\Workflow\ZF2\Factory\BasicWorkflowFactory;
 
-return [
+$config = [
     'service_manager' => [
         'factories' => [
             ModuleOptions::class => ModuleOptionsFactory::class,
@@ -27,11 +27,14 @@ return [
         'configurations' => [
 
         ],
-
-
-
         'managers' => [
 
         ]
     ]
 ];
+
+
+return array_merge_recursive(
+    include __DIR__ . '/router.config.php',
+    $config
+);
