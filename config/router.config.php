@@ -5,24 +5,57 @@
  */
 namespace OldTown\Workflow\ZF2;
 
+use OldTown\Workflow\ZF2\Controller\EngineController;
+
 return [
     'router' => [
         'routes' => [
             'workflow' => [
-                'type' => 'Literal',
-                'options' => [
+                'type'         => 'Literal',
+                'options'      => [
                     'route' => '/workflow/',
                 ],
-                'may_terminate' => true,
                 'child_routes' => [
                     'engine' => [
-                        'type' => 'Literal',
-                        'options' => [
-                            'route' => 'engine/',
+                        'type'         => 'segment',
+                        'options'      => [
+                            'route'       => 'engine/manager/:managerName/action/:actionName/',
+                            'constraints' => [
+                                'managerName' => '[a-zA-Z][a-zA-Z0-9_-]*',
+                                'actionName'  => '[a-zA-Z][a-zA-Z0-9_-]*'
+                            ]
+                        ],
+                        'child_routes' => [
+                            'doAction'   => [
+                                'type'    => 'segment',
+                                'options' => [
+                                    'route'       => 'entry/:entryId',
+                                    'constraints' => [
+                                        'entryId' => '\d+'
+                                    ],
+                                    'defaults'    => [
+                                        'controller' => EngineController::class,
+                                        'action' => 'do'
+                                    ],
+                                ],
+                            ],
+                            'initialize' => [
+                                'type'    => 'segment',
+                                'options' => [
+                                    'route'       => 'name/:workflowName',
+                                    'constraints' => [
+                                        'workflowName' => '[a-zA-Z][a-zA-Z0-9_-]*'
+                                    ],
+                                    'defaults'    => [
+                                        'controller' => EngineController::class,
+                                        'action' => 'initialize'
+                                    ],
+                                ],
+                            ]
                         ]
                     ]
-                ]
-            ],
+                ],
+            ]
         ]
     ]
 ];
