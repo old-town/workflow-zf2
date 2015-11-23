@@ -26,10 +26,17 @@ class WorkflowServiceFactory implements FactoryInterface, MutableCreationOptions
      * @param ServiceLocatorInterface $serviceLocator
      *
      * @return Workflow
+     *
+     * @throws \Zend\Stdlib\Exception\InvalidArgumentException
+     * @throws \OldTown\Workflow\ZF2\Service\Exception\InvalidArgumentException
      */
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
-        $w = new Workflow();
+        $options = [
+            'serviceLocator' => $serviceLocator
+        ];
+
+        $w = new Workflow($options);
 
         return $w;
     }

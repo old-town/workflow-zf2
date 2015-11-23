@@ -6,7 +6,8 @@
 namespace OldTown\Workflow\ZF2\Controller;
 
 
-use \Zend\Mvc\Controller\AbstractActionController;
+use Zend\Mvc\Controller\AbstractActionController;
+use OldTown\Workflow\ZF2\Service\Workflow;
 
 
 /**
@@ -14,7 +15,6 @@ use \Zend\Mvc\Controller\AbstractActionController;
  *
  * @package OldTown\Workflow\ZF2\Controller
  *
- * @method \Zend\Http\PhpEnvironment\Request getRequest()
  */
 class EngineController extends AbstractActionController
 {
@@ -22,14 +22,34 @@ class EngineController extends AbstractActionController
     /**
      * Создание нового процесса workflow
      *
-     *
+     * @throws \OldTown\Workflow\ZF2\Controller\Exception\InvalidArgumentException
+     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
      */
     public function initializeAction()
     {
         $routeMatch = $this->getEvent()->getRouteMatch();
         $workflowManagerName = $routeMatch->getParam('managerName', null);
+        if (null === $workflowManagerName) {
+            $errMsg = 'Param managerName not found';
+            throw new Exception\InvalidArgumentException($errMsg);
+        }
+
         $workflowActionName = $routeMatch->getParam('actionName', null);
+        if (null === $workflowActionName) {
+            $errMsg = 'Param actionName not found';
+            throw new Exception\InvalidArgumentException($errMsg);
+        }
+
         $workflowName = $routeMatch->getParam('workflowName', null);
+        if (null === $workflowName) {
+            $errMsg = 'Param workflowName not found';
+            throw new Exception\InvalidArgumentException($errMsg);
+        }
+
+        /** @var Workflow $workflowService */
+        $workflowService = $this->getServiceLocator()->get(Workflow::class);
+
+        $workflowService->initialize($workflowManagerName, $workflowName, $workflowActionName);
 
         return [];
     }
@@ -41,11 +61,11 @@ class EngineController extends AbstractActionController
      */
     public function doAction()
     {
-        $routeMatch = $this->getEvent()->getRouteMatch();
-
-        $workflowManagerName = $routeMatch->getParam('managerName', null);
-        $workflowActionName = $routeMatch->getParam('actionName', null);
-        $entryId = $routeMatch->getParam('entryId', null);
+//        $routeMatch = $this->getEvent()->getRouteMatch();
+//
+//        $workflowManagerName = $routeMatch->getParam('managerName', null);
+//        $workflowActionName = $routeMatch->getParam('actionName', null);
+//        $entryId = $routeMatch->getParam('entryId', null);
 
 
         return [];
