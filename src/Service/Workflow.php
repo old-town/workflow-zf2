@@ -72,11 +72,31 @@ class Workflow
      * @param $actionName
      *
      * @throws \OldTown\Workflow\ZF2\Service\Exception\InvalidInitializeWorkflowEntryException
+     * @throws \OldTown\Workflow\ZF2\Service\Exception\ActionNotFoundException
      */
     public function initialize($managerName, $workflowName, $actionName)
     {
         try {
             $manager = $this->getWorkflowManager($managerName);
+            $wf = $manager->getConfiguration()->getWorkflow($workflowName);
+
+            $actionId = null;
+            $initialActions = $wf->getInitialActions();
+
+            foreach ($initialActions as $initialAction) {
+                if ($actionName === $initialAction->getName()) {
+                    $actionId = $initialAction->getId();
+                    break;
+                }
+            }
+
+            if (null === $actionId) {
+                $errMsg = sprintf('Action %s not found', $actionName);
+                throw new Exception\ActionNotFoundException($errMsg);
+            }
+
+            $manager->initialize($workflowName, $actionId);
+
 
         } catch (\Exception $e) {
             throw new Exception\InvalidInitializeWorkflowEntryException($e->getMessage(), $e->getCode(), $e);

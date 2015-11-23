@@ -24,6 +24,7 @@ class EngineController extends AbstractActionController
      *
      * @throws \OldTown\Workflow\ZF2\Controller\Exception\InvalidArgumentException
      * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
+     * @throws \OldTown\Workflow\ZF2\Service\Exception\InvalidInitializeWorkflowEntryException
      */
     public function initializeAction()
     {
