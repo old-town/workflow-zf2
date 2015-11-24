@@ -36,6 +36,12 @@ class WorkflowEvent extends Event
     protected $transientVars;
 
     /**
+     *
+     * @var string
+     */
+    protected $viewName;
+
+    /**
      * @return WorkflowDescriptor
      */
     public function getWorkflow()
@@ -74,4 +80,26 @@ class WorkflowEvent extends Event
 
         return $this;
     }
+
+    /**
+     * @return string
+     */
+    public function getViewName()
+    {
+        return $this->viewName;
+    }
+
+    /**
+     * @param string $viewName
+     *
+     * @return $this
+     */
+    public function setViewName($viewName)
+    {
+        $this->viewName = (string)$viewName;
+
+        return $this;
+    }
+
+
 }

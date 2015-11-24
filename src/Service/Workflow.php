@@ -106,7 +106,9 @@ class Workflow
             $manager->initialize($workflowName, $actionId, $input);
 
             $initialActions = $wf->getInitialAction($actionId);
-            if (null !== $initialActions->getView()) {
+            $viewName = $initialActions->getView();
+            if (null !== $viewName) {
+                $event->setViewName($viewName);
                 $event->setName(WorkflowEvent::EVENT_RENDER);
                 $this->getEventManager()->trigger($event);
             }
