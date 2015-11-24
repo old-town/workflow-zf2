@@ -5,7 +5,6 @@
  */
 namespace  OldTown\Workflow\ZF2\Factory;
 
-
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\MutableCreationOptionsInterface;
 use Zend\ServiceManager\MutableCreationOptionsTrait;

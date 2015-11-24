@@ -5,7 +5,6 @@
  */
 namespace  OldTown\Workflow\ZF2\Service\Exception;
 
-
 /**
  * Class InvalidInitializeWorkflowEntryException
  *

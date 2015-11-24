@@ -5,7 +5,6 @@
  */
 namespace OldTown\Workflow\ZF2\Controller;
 
-
 use Zend\Mvc\Controller\AbstractActionController;
 use OldTown\Workflow\ZF2\Service\Workflow;
 
@@ -18,7 +17,6 @@ use OldTown\Workflow\ZF2\Service\Workflow;
  */
 class EngineController extends AbstractActionController
 {
-
     /**
      * Создание нового процесса workflow
      *
@@ -62,7 +60,7 @@ class EngineController extends AbstractActionController
      */
     public function doAction()
     {
-//        $routeMatch = $this->getEvent()->getRouteMatch();
+        //        $routeMatch = $this->getEvent()->getRouteMatch();
 //
 //        $workflowManagerName = $routeMatch->getParam('managerName', null);
 //        $workflowActionName = $routeMatch->getParam('actionName', null);
@@ -71,5 +69,4 @@ class EngineController extends AbstractActionController
 
         return [];
     }
-
 }

@@ -6,9 +6,12 @@
 namespace OldTown\Workflow\ZF2\Service;
 
 use OldTown\Workflow\WorkflowInterface;
+use Zend\EventManager\EventManagerAwareTrait;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Traversable;
 use Zend\Stdlib\ArrayUtils;
+use OldTown\Workflow\TransientVars\BaseTransientVars;
+use OldTown\Workflow\ZF2\Event\WorkflowEvent;
 
 
 /**
@@ -19,7 +22,7 @@ use Zend\Stdlib\ArrayUtils;
  */
 class Workflow
 {
-    use ServiceLocatorAwareTrait;
+    use ServiceLocatorAwareTrait, EventManagerAwareTrait;
 
     /**
      * Паттерн для получения имени сервиса workflow
@@ -61,7 +64,6 @@ class Workflow
             throw new Exception\InvalidArgumentException($errMsg);
         }
         $this->setServiceLocator($options['serviceLocator']);
-
     }
 
     /**
@@ -77,8 +79,12 @@ class Workflow
     public function initialize($managerName, $workflowName, $actionName)
     {
         try {
+            $event = new WorkflowEvent();
+            $event->setTarget($this);
+
             $manager = $this->getWorkflowManager($managerName);
             $wf = $manager->getConfiguration()->getWorkflow($workflowName);
+            $event->setWorkflow($wf);
 
             $actionId = null;
             $initialActions = $wf->getInitialActions();
@@ -95,15 +101,18 @@ class Workflow
                 throw new Exception\ActionNotFoundException($errMsg);
             }
 
-            $manager->initialize($workflowName, $actionId);
+            $input = new BaseTransientVars();
+            $event->setTransientVars($input);
+            $manager->initialize($workflowName, $actionId, $input);
 
-
+            $initialActions = $wf->getInitialAction($actionId);
+            if (null !== $initialActions->getView()) {
+                $event->setName(WorkflowEvent::EVENT_RENDER);
+                $this->getEventManager()->trigger($event);
+            }
         } catch (\Exception $e) {
             throw new Exception\InvalidInitializeWorkflowEntryException($e->getMessage(), $e->getCode(), $e);
         }
-
-
-
     }
 
 
@@ -120,7 +129,6 @@ class Workflow
      */
     public function getWorkflowManager($managerName)
     {
-
         if (!$this->hasWorkflowManager($managerName)) {
             $errMsg = sprintf('Invalid workflow manager name %s', $managerName);
             throw new Exception\InvalidManagerNameException($errMsg);
@@ -183,6 +191,4 @@ class Workflow
 
         return $this;
     }
-
-
 }

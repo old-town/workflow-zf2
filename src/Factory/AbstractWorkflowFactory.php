@@ -74,7 +74,6 @@ class AbstractWorkflowFactory implements AbstractFactoryInterface, MutableCreati
      */
     public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
     {
-
         $managerName = substr($requestedName, strlen(static::SERVICE_NAME_PREFIX));
 
         try {
