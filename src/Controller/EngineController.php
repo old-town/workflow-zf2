@@ -23,6 +23,7 @@ class EngineController extends AbstractActionController
      * @throws \OldTown\Workflow\ZF2\Controller\Exception\InvalidArgumentException
      * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
      * @throws \OldTown\Workflow\ZF2\Service\Exception\InvalidInitializeWorkflowEntryException
+     * @throws \OldTown\Workflow\ZF2\Service\Exception\ActionNotFoundException
      */
     public function initializeAction()
     {
@@ -48,9 +49,9 @@ class EngineController extends AbstractActionController
         /** @var Workflow $workflowService */
         $workflowService = $this->getServiceLocator()->get(Workflow::class);
 
-        $workflowService->initialize($workflowManagerName, $workflowName, $workflowActionName);
+        $result = $workflowService->initialize($workflowManagerName, $workflowName, $workflowActionName);
 
-        return [];
+        return $result;
     }
 
     /**
