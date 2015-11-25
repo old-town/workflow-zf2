@@ -100,6 +100,4 @@ class WorkflowEvent extends Event
 
         return $this;
     }
-
-
 }

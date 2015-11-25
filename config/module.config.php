@@ -33,6 +33,12 @@ $config = [
         'managers' => [
 
         ]
+    ],
+
+    'view_manager' => [
+        'template_map' => [
+            'workflow-zf2-empty' => __DIR__ . '/../view/empty.phtml'
+        ]
     ]
 ];
 

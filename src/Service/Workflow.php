@@ -76,12 +76,11 @@ class Workflow
      * @throws \OldTown\Workflow\ZF2\Service\Exception\InvalidInitializeWorkflowEntryException
      * @throws \OldTown\Workflow\ZF2\Service\Exception\ActionNotFoundException
      *
-     * @return mixed
+     * @return integer
      */
     public function initialize($managerName, $workflowName, $actionName)
     {
         try {
-            $result = [];
             $event = new WorkflowEvent();
             $event->setTarget($this);
 
@@ -106,21 +105,20 @@ class Workflow
 
             $input = new BaseTransientVars();
             $event->setTransientVars($input);
-            $manager->initialize($workflowName, $actionId, $input);
+            $entryId = $manager->initialize($workflowName, $actionId, $input);
 
             $initialActions = $wf->getInitialAction($actionId);
             $viewName = $initialActions->getView();
             if (null !== $viewName) {
                 $event->setViewName($viewName);
                 $event->setName(WorkflowEvent::EVENT_RENDER);
-                $resultEvent = $this->getEventManager()->trigger($event);
-                $result = $resultEvent->last();
+                $this->getEventManager()->trigger($event);
             }
         } catch (\Exception $e) {
             throw new Exception\InvalidInitializeWorkflowEntryException($e->getMessage(), $e->getCode(), $e);
         }
 
-        return $result;
+        return $entryId;
     }
 
 
