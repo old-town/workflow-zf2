@@ -7,8 +7,7 @@ namespace OldTown\Workflow\ZF2\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController;
 use OldTown\Workflow\ZF2\Service\Workflow;
-use Zend\View\Model\ViewModel;
-
+use OldTown\Workflow\ZF2\ViewRenderer\EmptyModel;
 
 /**
  * Class EngineController
@@ -52,9 +51,7 @@ class EngineController extends AbstractActionController
 
         $workflowService->initialize($workflowManagerName, $workflowName, $workflowActionName);
 
-        $result = new ViewModel();
-        $result->setTemplate('workflow-zf2-empty');
-
+        $result = new EmptyModel();
         return $result;
     }
 

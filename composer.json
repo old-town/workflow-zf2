@@ -19,6 +19,7 @@
     "php": ">=5.5.0",
     "old-town/workflow": "dev-dev",
     "zendframework/zend-mvc": "~2.4.0",
+    "zendframework/zend-view": "~2.4.0",
     "zendframework/zend-stdlib": "~2.4.0",
     "zendframework/zend-servicemanager": "~2.4.0"
   },
