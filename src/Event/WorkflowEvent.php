@@ -7,6 +7,7 @@ namespace  OldTown\Workflow\ZF2\Event;
 
 use OldTown\Workflow\Loader\WorkflowDescriptor;
 use OldTown\Workflow\TransientVars\TransientVarsInterface;
+use OldTown\Workflow\WorkflowInterface;
 use Zend\EventManager\Event;
 
 /**
@@ -22,6 +23,20 @@ class WorkflowEvent extends Event
      * @var string
      */
     const EVENT_RENDER         = 'render';
+
+    /**
+     * Запуск нового процесса workflow
+     *
+     * @var string
+     */
+    const EVENT_WORKFLOW_INITIALIZE         = 'initialize';
+
+    /**
+     * Запуск перехода между двумя действиями workflow
+     *
+     * @var string
+     */
+    const EVENT_DO_ACTION         = 'doAction';
 
     /**
      * @var WorkflowDescriptor
@@ -40,6 +55,17 @@ class WorkflowEvent extends Event
      * @var string
      */
     protected $viewName;
+
+    /**
+     * @var WorkflowInterface
+     */
+    protected $workflowManager;
+
+    /**
+     *
+     * @var integer
+     */
+    protected $entryId;
 
     /**
      * @return WorkflowDescriptor
@@ -97,6 +123,46 @@ class WorkflowEvent extends Event
     public function setViewName($viewName)
     {
         $this->viewName = (string)$viewName;
+
+        return $this;
+    }
+
+    /**
+     * @return WorkflowInterface
+     */
+    public function getWorkflowManager()
+    {
+        return $this->workflowManager;
+    }
+
+    /**
+     * @param WorkflowInterface $workflowManager
+     *
+     * @return $this
+     */
+    public function setWorkflowManager(WorkflowInterface $workflowManager)
+    {
+        $this->workflowManager = $workflowManager;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getEntryId()
+    {
+        return $this->entryId;
+    }
+
+    /**
+     * @param int $entryId
+     *
+     * @return $this
+     */
+    public function setEntryId($entryId)
+    {
+        $this->entryId = (integer)$entryId;
 
         return $this;
     }

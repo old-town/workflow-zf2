@@ -5,6 +5,7 @@
  */
 namespace OldTown\Workflow\ZF2\Service;
 
+use OldTown\Workflow\Loader\WorkflowDescriptor;
 use OldTown\Workflow\WorkflowInterface;
 use Zend\EventManager\EventManagerAwareTrait;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
@@ -67,6 +68,56 @@ class Workflow
     }
 
     /**
+     * Запуск перехода из отдного состояния в другое
+     *
+     * @param $managerName
+     * @param $entryId
+     * @param $actionName
+     *
+     * @return mixed
+     *
+     * @throws \OldTown\Workflow\ZF2\Service\Exception\DoActionException
+     */
+    public function doAction($managerName, $entryId, $actionName)
+    {
+        try {
+            $event = new WorkflowEvent();
+            $event->setTarget($this);
+            $event->setEntryId($entryId);
+
+            $manager = $this->getWorkflowManager($managerName);
+            $event->setWorkflowManager($manager);
+
+            $workflowStore = $manager->getConfiguration()->getWorkflowStore();
+
+            $entry = $workflowStore->findEntry($entryId);
+            $workflowName = $entry->getWorkflowName();
+
+            $wf = $manager->getConfiguration()->getWorkflow($workflowName);
+            $event->setWorkflow($wf);
+
+            $action = $this->getActionByName($wf, $actionName);
+            $actionId = $action->getId();
+
+            $input = new BaseTransientVars();
+            $event->setTransientVars($input);
+
+            $manager->doAction($entryId, $actionId, $input);
+
+            $this->getEventManager()->trigger(WorkflowEvent::EVENT_DO_ACTION, $this, $event);
+
+            $viewName = $action->getView();
+            if (null !== $viewName) {
+                $event->setViewName($viewName);
+                $event->setName(WorkflowEvent::EVENT_RENDER);
+                $this->getEventManager()->trigger($event);
+            }
+        } catch (\Exception $e) {
+            throw new Exception\DoActionException($e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
      * Создание процесса workflow
      *
      * @param $managerName
@@ -85,6 +136,7 @@ class Workflow
             $event->setTarget($this);
 
             $manager = $this->getWorkflowManager($managerName);
+            $event->setWorkflowManager($manager);
             $wf = $manager->getConfiguration()->getWorkflow($workflowName);
             $event->setWorkflow($wf);
 
@@ -106,6 +158,10 @@ class Workflow
             $input = new BaseTransientVars();
             $event->setTransientVars($input);
             $entryId = $manager->initialize($workflowName, $actionId, $input);
+            $event->setEntryId($entryId);
+
+            $this->getEventManager()->trigger(WorkflowEvent::EVENT_WORKFLOW_INITIALIZE, $this, $event);
+
 
             $initialActions = $wf->getInitialAction($actionId);
             $viewName = $initialActions->getView();
@@ -151,6 +207,39 @@ class Workflow
         return $manager;
     }
 
+    /**
+     * @param WorkflowDescriptor $wf
+     * @param                    $actionName
+     *
+     * @return null|\OldTown\Workflow\Loader\ActionDescriptor
+     */
+    public function getActionByName(WorkflowDescriptor $wf, $actionName)
+    {
+        $actionName = (string)$actionName;
+
+        foreach ($wf->getGlobalActions() as $actionDescriptor) {
+            if ($actionName === $actionDescriptor->getName()) {
+                return $actionDescriptor;
+            }
+        }
+
+        foreach ($wf->getSteps() as $stepDescriptor) {
+            $actions = $stepDescriptor->getActions();
+            foreach ($actions as $actionDescriptor) {
+                if ($actionName === $actionDescriptor->getName()) {
+                    return $actionDescriptor;
+                }
+            }
+        }
+
+        foreach ($wf->getInitialActions() as $actionDescriptor) {
+            if ($actionName === $actionDescriptor->getName()) {
+                return $actionDescriptor;
+            }
+        }
+
+        return null;
+    }
 
     /**
      * Проверят есть ли менеджер workflow с заданным именем

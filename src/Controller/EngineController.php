@@ -20,6 +20,8 @@ class EngineController extends AbstractActionController
     /**
      * Создание нового процесса workflow
      *
+     * @return EmptyModel
+     *
      * @throws \OldTown\Workflow\ZF2\Controller\Exception\InvalidArgumentException
      * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
      * @throws \OldTown\Workflow\ZF2\Service\Exception\InvalidInitializeWorkflowEntryException
@@ -58,17 +60,40 @@ class EngineController extends AbstractActionController
     /**
      * Выполнение нового действия
      *
-     *
+     * @throws \OldTown\Workflow\ZF2\Controller\Exception\InvalidArgumentException
+     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
+     * @throws \OldTown\Workflow\ZF2\Service\Exception\DoActionException
      */
     public function doAction()
     {
-        //        $routeMatch = $this->getEvent()->getRouteMatch();
-//
-//        $workflowManagerName = $routeMatch->getParam('managerName', null);
-//        $workflowActionName = $routeMatch->getParam('actionName', null);
-//        $entryId = $routeMatch->getParam('entryId', null);
+        $routeMatch = $this->getEvent()->getRouteMatch();
+
+        $workflowManagerName = $routeMatch->getParam('managerName', null);
+        if (null === $workflowManagerName) {
+            $errMsg = 'Param managerName not found';
+            throw new Exception\InvalidArgumentException($errMsg);
+        }
+
+        $workflowActionName = $routeMatch->getParam('actionName', null);
+        if (null === $workflowActionName) {
+            $errMsg = 'Param actionName not found';
+            throw new Exception\InvalidArgumentException($errMsg);
+        }
+
+        $entryId = $routeMatch->getParam('entryId', null);
+        if (null === $entryId) {
+            $errMsg = 'Param actionName not found';
+            throw new Exception\InvalidArgumentException($errMsg);
+        }
+
+        /** @var Workflow $workflowService */
+        $workflowService = $this->getServiceLocator()->get(Workflow::class);
 
 
-        return [];
+        $workflowService->doAction($workflowManagerName, $entryId, $workflowActionName);
+
+
+        $result = new EmptyModel();
+        return $result;
     }
 }
