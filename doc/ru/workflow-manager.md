@@ -88,3 +88,10 @@ return [
 * persistence - настройка хранилища состояния запущенных процессов workflow. Содержит следующие настройки
   * name - имя класса. Класс должен реализовывать интерфейс \OldTown\Workflow\Spi\WorkflowStoreInterface.
   * options - массив содержащий настройки хранилища
+
+* factory - настройка фабрики создания workflow.
+  * name - имя класса фабрики. По умолчанию используется  \OldTown\Workflow\Loader\ArrayWorkflowFactory
+  * options - массив содержащий настройки фабрики
+
+* resolver - мя класса или имя сервиса доступного в ServiceLocator приложения, реализующего функционал резолвера переменных в xml файле описывающем workflow
+
