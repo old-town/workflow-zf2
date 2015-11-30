@@ -1,16 +1,16 @@
 
-## Создание менеджера workflow ##
+# Создание менеджера workflow #
 Создание и настройка менеджера workflow (объекта реализующего интерфейс \OldTown\Workflow\WorkflowInterface) 
 происходит через абстрактую фабрику  [AbstractWorkflowFactory](src/Factory/AbstractWorkflowFactory.php).
 
 Для работый работы [AbstractWorkflowFactory](src/Factory/AbstractWorkflowFactory.php) необходимо описать конфигурацию
 менеджера workflow в конфигурационных файлах приложения. В качестве примера можно использовать файл [workflow.config.dist](config/workflow.config.dist).
 
-## Описание структуры конфига ##
+# Описание структуры конфига #
 
 Все настройки модуля находятся в секции workflow_zf2
 
-### Пример конфига ###
+## Пример конфига ##
 
 
 ```php
@@ -72,7 +72,16 @@ return [
 
 ``` 
 
-### Структура конфига ###
- 
- * Секция managers
- * Секция configurations
+## Структура конфига ##
+
+### Секция managers ###
+    Ключем является имя менеджера, а значением конфиг описывающий настройки для этого менеджера. Возможные настройки:
+    * configuration - имя конфигурации. Конфигурация с данным именем должна быть описана в секции configurations
+    * name - клас реализующий интерфейс \OldTown\Workflow\WorkflowInterface. По умолчанию используется \OldTown\Workflow\Basic\BasicWorkflow
+
+### Секция configurations ###
+    Ключем является имя конфигурации менеджера workflow, а значением описание данной конфигурации. Возможные настройки:
+    
+    * persistence - настройка хранилища состояния запущенных процессов workflow. Содержит следующие настройки
+    ** name - имя класса. Класс должен реализовывать интерфейс \OldTown\Workflow\Spi\WorkflowStoreInterface.
+    ** options - массив содержащий настройки хранилища
