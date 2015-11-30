@@ -1,4 +1,3 @@
-
 # Создание менеджера workflow 
 Создание и настройка менеджера workflow (объекта реализующего интерфейс \OldTown\Workflow\WorkflowInterface) 
 происходит через абстрактую фабрику  [AbstractWorkflowFactory](src/Factory/AbstractWorkflowFactory.php).
