@@ -9,6 +9,7 @@
 
 * [Менеджер workflow](doc/ru/workflow-manager.md)
 * [ArrayWorkflowFactory](doc/ru/array-workflow-factory.md)  - использование  ArrayWorkflowFactory, для создания менеджера workflow
+* [WorkflowService](doc/ru/workflow-service.md)  - сервис для работы с workflow
 
 
  
