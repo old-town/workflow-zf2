@@ -90,8 +90,17 @@ return [
   * options - массив содержащий настройки хранилища
 
 * factory - настройка фабрики создания workflow.
-  * name - имя класса фабрики. По умолчанию используется  \OldTown\Workflow\Loader\ArrayWorkflowFactory
+  * name - имя класса фабрики. По умолчанию используется  [ArrayWorkflowFactory](array-workflow-factory.md)
   * options - массив содержащий настройки фабрики
 
-* resolver - мя класса или имя сервиса доступного в ServiceLocator приложения, реализующего функционал резолвера переменных в xml файле описывающем workflow
+* resolver - имя класса или имя сервиса доступного в ServiceLocator приложения, реализующего функционал резолвера переменных в xml файле описывающем workflow
 
+## Настройка фабрики создания workflow
+
+Фабрика workflow(класс реализующий интерфейс \OldTown\Workflow\Loader\WorkflowFactoryInterface) отвечает за настройку менеджера workflow.
+В поставку библиотеки [old-town/workflow](https://github.com/old-town/old-town-workflow) входит фабрика \OldTown\Workflow\Loader\ArrayWorkflowFactory,
+предоставляющая возможность настроить workflow с помощью конфига переданного в массиве(также есть фабрики производящие
+настройку на основе конфигурационного xml файла, а также на оснвое url по которому можно скачать конфигурационный xml файл).
+
+В случае если используется фабрика [ArrayWorkflowFactory](array-workflow-factory.md), то как регистрировать файлы workflow,
+и производить другие настройки менеджера workflow описывается с оответствующем разделе [документации](array-workflow-factory.md)
