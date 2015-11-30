@@ -17,7 +17,7 @@ class CallerEvent extends Event
     /**
      * @var string
      */
-    const EVENT_RESOLVE_CALLER = 'resolve.caller';
+    const EVENT_RESOLVE_CALLER = 'workflow.basic.resolve.caller';
 
     /**
      * @var string|null
