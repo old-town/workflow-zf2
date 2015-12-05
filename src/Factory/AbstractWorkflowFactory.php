@@ -17,7 +17,8 @@ use OldTown\Workflow\ZF2\Options\ModuleOptions;
 use OldTown\Workflow\WorkflowInterface;
 use OldTown\Workflow\Config\ConfigurationInterface;
 use OldTown\Workflow\Loader\WorkflowFactoryInterface;
-
+use OldTown\Workflow\ZF2\Service\Workflow;
+use OldTown\Workflow\ZF2\Event\WorkflowManagerEvent;
 
 
 /**
@@ -107,12 +108,22 @@ class AbstractWorkflowFactory implements AbstractFactoryInterface, MutableCreati
             $workflowConfig = $this->buildWorkflowManagerConfig($configurationOptions, $serviceLocator);
 
             $workflowManager->setConfiguration($workflowConfig);
+
+            /** @var Workflow $workflowService */
+            $workflowService = $serviceLocator->get(Workflow::class);
+
+            $event = new WorkflowManagerEvent();
+            $event->setWorkflowManager($workflowManager)
+                  ->setName(WorkflowManagerEvent::EVENT_CREATE)
+                  ->setTarget($workflowManager);
+            $workflowService->getEventManager()->trigger($event);
         } catch (\Exception $e) {
             throw new Exception\FactoryException($e->getMessage(), $e->getCode(), $e);
         }
 
         return $workflowManager;
     }
+
 
     /**
      * Создает конфиг для workflow

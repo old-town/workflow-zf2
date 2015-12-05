@@ -49,6 +49,15 @@
 сервисом из других модулей. Для передачи информации о событии, используется объект события инстанцированного от класса
 [WorkflowEvent](./../../src/Event/WorkflowEvent.php). Сервис бросает следующие события:
 
+### workflow.manager.create
+  Событие бросается при создание нового менеджера workflow(объект реализующий интерфейс \OldTown\Workflow\WorkflowInterface).
+  Бросаемое событие инкапуслировано от класса [WorkflowManagerEvent](./../../src/Event/WorkflowManagerEvent.php). Собыите 
+  содержит следующую информацию:
+  
+  * workflowManager - менеджер workflow. Объект реализующий интерфейс \OldTown\Workflow\WorkflowInterface
+  
+  Данное событие может быть использованно для дополнительной настройки менеджера workflow в других модулях.
+
 ### initialize
  Событие бросается когда создается новый процесс workflow.
  
