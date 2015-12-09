@@ -19,10 +19,10 @@ return [
                     'engine' => [
                         'type'         => 'segment',
                         'options'      => [
-                            'route'       => 'engine/manager/:managerName/action/:actionName/',
+                            'route'       => 'engine/manager/:workflowManagerName/action/:workflowActionName/',
                             'constraints' => [
-                                'managerName' => '[a-zA-Z][a-zA-Z0-9_-]*',
-                                'actionName'  => '[a-zA-Z][a-zA-Z0-9_-]*'
+                                'workflowManagerName' => '[a-zA-Z][a-zA-Z0-9_-]*',
+                                'workflowActionName'  => '[a-zA-Z][a-zA-Z0-9_-]*'
                             ]
                         ],
                         'child_routes' => [
@@ -53,6 +53,12 @@ return [
                                 ],
                             ]
                         ]
+                    ],
+                    'dispatch' => [
+                        'type'         => 'Literal',
+                        'options'      => [
+                            'route' => 'dispatch/'
+                        ],
                     ]
                 ],
             ]

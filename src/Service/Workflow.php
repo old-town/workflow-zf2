@@ -13,6 +13,8 @@ use Traversable;
 use Zend\Stdlib\ArrayUtils;
 use OldTown\Workflow\TransientVars\BaseTransientVars;
 use OldTown\Workflow\ZF2\Event\WorkflowEvent;
+use OldTown\Workflow\ZF2\Service\Workflow\TransitionResult;
+use OldTown\Workflow\ZF2\Service\Workflow\TransitionResultInterface;
 
 
 /**
@@ -74,7 +76,7 @@ class Workflow
      * @param $entryId
      * @param $actionName
      *
-     * @return mixed
+     * @return TransitionResultInterface
      *
      * @throws \OldTown\Workflow\ZF2\Service\Exception\DoActionException
      */
@@ -115,6 +117,13 @@ class Workflow
         } catch (\Exception $e) {
             throw new Exception\DoActionException($e->getMessage(), $e->getCode(), $e);
         }
+
+        $result = new TransitionResult($entryId, $manager, $wf, $input);
+        if ($viewName) {
+            $result->setViewName($viewName);
+        }
+
+        return $result;
     }
 
     /**
@@ -125,9 +134,8 @@ class Workflow
      * @param $actionName
      *
      * @throws \OldTown\Workflow\ZF2\Service\Exception\InvalidInitializeWorkflowEntryException
-     * @throws \OldTown\Workflow\ZF2\Service\Exception\ActionNotFoundException
      *
-     * @return integer
+     * @return TransitionResultInterface
      */
     public function initialize($managerName, $workflowName, $actionName)
     {
@@ -174,7 +182,12 @@ class Workflow
             throw new Exception\InvalidInitializeWorkflowEntryException($e->getMessage(), $e->getCode(), $e);
         }
 
-        return $entryId;
+        $result = new TransitionResult($entryId, $manager, $wf, $input);
+        if ($viewName) {
+            $result->setViewName($viewName);
+        }
+
+        return $result;
     }
 
 
@@ -286,4 +299,5 @@ class Workflow
 
         return $this;
     }
+
 }

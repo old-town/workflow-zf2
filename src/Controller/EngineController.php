@@ -30,15 +30,15 @@ class EngineController extends AbstractActionController
     public function initializeAction()
     {
         $routeMatch = $this->getEvent()->getRouteMatch();
-        $workflowManagerName = $routeMatch->getParam('managerName', null);
+        $workflowManagerName = $routeMatch->getParam('workflowManagerName', null);
         if (null === $workflowManagerName) {
-            $errMsg = 'Param managerName not found';
+            $errMsg = 'Param workflowManagerName not found';
             throw new Exception\InvalidArgumentException($errMsg);
         }
 
-        $workflowActionName = $routeMatch->getParam('actionName', null);
+        $workflowActionName = $routeMatch->getParam('workflowActionName', null);
         if (null === $workflowActionName) {
-            $errMsg = 'Param actionName not found';
+            $errMsg = 'Param workflowActionName not found';
             throw new Exception\InvalidArgumentException($errMsg);
         }
 
@@ -68,21 +68,21 @@ class EngineController extends AbstractActionController
     {
         $routeMatch = $this->getEvent()->getRouteMatch();
 
-        $workflowManagerName = $routeMatch->getParam('managerName', null);
+        $workflowManagerName = $routeMatch->getParam('workflowManagerName', null);
         if (null === $workflowManagerName) {
-            $errMsg = 'Param managerName not found';
+            $errMsg = 'Param workflowManagerName not found';
             throw new Exception\InvalidArgumentException($errMsg);
         }
 
-        $workflowActionName = $routeMatch->getParam('actionName', null);
+        $workflowActionName = $routeMatch->getParam('workflowActionName', null);
         if (null === $workflowActionName) {
-            $errMsg = 'Param actionName not found';
+            $errMsg = 'Param workflowActionName not found';
             throw new Exception\InvalidArgumentException($errMsg);
         }
 
         $entryId = $routeMatch->getParam('entryId', null);
         if (null === $entryId) {
-            $errMsg = 'Param actionName not found';
+            $errMsg = 'Param entryId not found';
             throw new Exception\InvalidArgumentException($errMsg);
         }
 
