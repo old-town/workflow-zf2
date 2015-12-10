@@ -54,12 +54,6 @@ return [
                             ]
                         ]
                     ],
-                    'dispatch' => [
-                        'type'         => 'Literal',
-                        'options'      => [
-                            'route' => 'dispatch/'
-                        ],
-                    ]
                 ],
             ]
         ]
