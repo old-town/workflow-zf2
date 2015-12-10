@@ -33,18 +33,11 @@ $config = [
         'managers' => [
 
         ]
-    ],
-
-    'view_manager' => [
-        'template_map' => [
-            'workflow-zf2-empty' => __DIR__ . '/../view/empty.phtml'
-        ]
     ]
 ];
 
 
 return array_merge_recursive(
-    include __DIR__ . '/controller.config.php',
     include __DIR__ . '/router.config.php',
     $config
 );

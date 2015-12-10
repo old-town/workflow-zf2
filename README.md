@@ -6,8 +6,7 @@
 
 
 Модуль предоставляет возможность конфигурировать workflow через стандартный механизм конфигов ZF2. Также в модуле
-реализован сервис предоставляющий возможность удобной работы с базовым функционалом workflow. Модуль обеспечивает
-единую точку входа, для создания процесса workflow и запуска перехода из одного состояния в другое. 
+реализован сервис предоставляющий возможность удобной работы с базовым функционалом workflow. 
 
 ## Оглавление ##
 
@@ -15,6 +14,6 @@
 * [ArrayWorkflowFactory](doc/ru/array-workflow-factory.md)  - использование  ArrayWorkflowFactory, для создания менеджера workflow
 * [WorkflowService](doc/ru/workflow-service.md)  - сервис для работы с workflow
 * [BasicWorkflow](doc/ru/basic-workflow.md)  - менеджер workflow
-* [EngineController](doc/ru/engine-controller.md)  - контроллер по умолчанию для работы с workflow
+
 
  

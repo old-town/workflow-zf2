@@ -6,16 +6,14 @@
 namespace OldTown\Workflow\ZF2;
 
 
-use Zend\Mvc\Application;
+
 use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
 use Zend\EventManager\EventInterface;
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\ModuleManager\Feature\ConfigProviderInterface;
 use Zend\ModuleManager\Feature\BootstrapListenerInterface;
-use Zend\View\View;
-use OldTown\Workflow\ZF2\ViewRenderer\EmptyModelStrategy;
-use OldTown\Workflow\ZF2\ViewRenderer\EmptyModelRenderer;
+
 
 
 /**
@@ -48,34 +46,8 @@ class Module implements
         $moduleRouteListener = new ModuleRouteListener();
         $moduleRouteListener->attach($eventManager);
 
-
-        $eventManager->attach(MvcEvent::EVENT_ROUTE, array($this, 'onRoute'));
     }
 
-    /**
-     * @param MvcEvent $e
-     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
-     */
-    public function onRoute(MvcEvent $e)
-    {
-        /** @var Application $app */
-        $app = $e->getParam('application');
-        $sm = $app->getServiceManager();
-
-        if ($sm->has('View')) {
-
-            /** @var View $view */
-            $view   = $sm->get('View');
-
-            $eventManager = $view->getEventManager();
-
-            $renderer = new EmptyModelRenderer();
-            $listener = new EmptyModelStrategy($renderer);
-            $eventManager->attach($listener, 200);
-
-        }
-
-    }
 
     /**
      * @return mixed
