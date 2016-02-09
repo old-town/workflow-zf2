@@ -4,6 +4,7 @@
  * @author  Malofeykin Andrey  <and-rey2@yandex.ru>
  */
 namespace OldTown\Workflow\ZF2\Service\Workflow;
+
 use OldTown\Workflow\Loader\WorkflowDescriptor;
 use OldTown\Workflow\TransientVars\TransientVarsInterface;
 use OldTown\Workflow\WorkflowInterface;
@@ -15,7 +16,6 @@ use OldTown\Workflow\WorkflowInterface;
  */
 trait TransitionResultTrait
 {
-
     /**
      * @var WorkflowDescriptor
      */

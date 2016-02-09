@@ -299,5 +299,4 @@ class Workflow
 
         return $this;
     }
-
 }

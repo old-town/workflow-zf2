@@ -38,5 +38,4 @@ class WorkflowEvent extends Event implements TransitionResultInterface
      * @var string
      */
     const EVENT_DO_ACTION         = 'doAction';
-
 }
