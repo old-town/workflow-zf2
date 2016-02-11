@@ -9,7 +9,7 @@ use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\MutableCreationOptionsInterface;
 use Zend\ServiceManager\MutableCreationOptionsTrait;
 use Zend\ServiceManager\ServiceLocatorInterface;
-use OldTown\Workflow\ZF2\Service\Workflow;
+use OldTown\Workflow\ZF2\ServiceEngine\Workflow;
 
 
 /**

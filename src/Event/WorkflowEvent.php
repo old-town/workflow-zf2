@@ -5,8 +5,8 @@
  */
 namespace  OldTown\Workflow\ZF2\Event;
 
-use OldTown\Workflow\ZF2\Service\Workflow\TransitionResultInterface;
-use OldTown\Workflow\ZF2\Service\Workflow\TransitionResultTrait;
+use OldTown\Workflow\ZF2\ServiceEngine\Workflow\TransitionResultInterface;
+use OldTown\Workflow\ZF2\ServiceEngine\Workflow\TransitionResultTrait;
 use Zend\EventManager\Event;
 
 /**

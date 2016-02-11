@@ -3,7 +3,7 @@
  * @link    https://github.com/old-town/workflow-zf2
  * @author  Malofeykin Andrey  <and-rey2@yandex.ru>
  */
-namespace OldTown\Workflow\ZF2\Service\Workflow;
+namespace OldTown\Workflow\ZF2\ServiceEngine\Workflow;
 
 use OldTown\Workflow\Loader\WorkflowDescriptor;
 use OldTown\Workflow\TransientVars\TransientVarsInterface;
@@ -13,7 +13,7 @@ use OldTown\Workflow\WorkflowInterface;
 /**
  * Class TransitionResult
  *
- * @package OldTown\Workflow\ZF2\Service\Workflow
+ * @package OldTown\Workflow\ZF2\ServiceEngine\Workflow
  */
 class TransitionResult implements TransitionResultInterface
 {

@@ -11,7 +11,7 @@ use OldTown\Workflow\ZF2\Options\ModuleOptionsFactory;
 use OldTown\Workflow\ZF2\Factory\AbstractWorkflowFactory;
 use OldTown\Workflow\Basic\BasicWorkflow;
 use OldTown\Workflow\ZF2\Factory\BasicWorkflowFactory;
-use OldTown\Workflow\ZF2\Service\Workflow;
+use OldTown\Workflow\ZF2\ServiceEngine\Workflow;
 use OldTown\Workflow\ZF2\Factory\WorkflowServiceFactory;
 
 $config = [

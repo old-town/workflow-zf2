@@ -3,9 +3,10 @@
  * @link https://github.com/old-town/workflow-zf2
  * @author  Malofeykin Andrey  <and-rey2@yandex.ru>
  */
-namespace OldTown\Workflow\ZF2\Service;
+namespace OldTown\Workflow\ZF2\ServiceEngine;
 
 use OldTown\Workflow\Loader\WorkflowDescriptor;
+use OldTown\Workflow\TransientVars\TransientVarsInterface;
 use OldTown\Workflow\WorkflowInterface;
 use Zend\EventManager\EventManagerAwareTrait;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
@@ -13,15 +14,13 @@ use Traversable;
 use Zend\Stdlib\ArrayUtils;
 use OldTown\Workflow\TransientVars\BaseTransientVars;
 use OldTown\Workflow\ZF2\Event\WorkflowEvent;
-use OldTown\Workflow\ZF2\Service\Workflow\TransitionResult;
-use OldTown\Workflow\ZF2\Service\Workflow\TransitionResultInterface;
-
+use OldTown\Workflow\ZF2\ServiceEngine\Workflow\TransitionResult;
+use OldTown\Workflow\ZF2\ServiceEngine\Workflow\TransitionResultInterface;
 
 /**
  * Class Workflow
  *
- * @package OldTown\Workflow\ZF2\Service
- *
+ * @package OldTown\Workflow\ZF2\ServiceEngine
  */
 class Workflow
 {
@@ -72,15 +71,15 @@ class Workflow
     /**
      * Запуск перехода из отдного состояния в другое
      *
-     * @param $managerName
-     * @param $entryId
-     * @param $actionName
+     * @param                        $managerName
+     * @param                        $entryId
+     * @param                        $actionName
+     *
+     * @param TransientVarsInterface $transientVars
      *
      * @return TransitionResultInterface
-     *
-     * @throws \OldTown\Workflow\ZF2\Service\Exception\DoActionException
      */
-    public function doAction($managerName, $entryId, $actionName)
+    public function doAction($managerName, $entryId, $actionName, TransientVarsInterface $transientVars = null)
     {
         try {
             $event = new WorkflowEvent();
@@ -101,10 +100,13 @@ class Workflow
             $action = $this->getActionByName($wf, $actionName);
             $actionId = $action->getId();
 
-            $input = new BaseTransientVars();
-            $event->setTransientVars($input);
+            if (null === $transientVars) {
+                $transientVars = new BaseTransientVars();
+            }
 
-            $manager->doAction($entryId, $actionId, $input);
+            $event->setTransientVars($transientVars);
+
+            $manager->doAction($entryId, $actionId, $transientVars);
 
             $this->getEventManager()->trigger(WorkflowEvent::EVENT_DO_ACTION, $this, $event);
 
@@ -118,7 +120,7 @@ class Workflow
             throw new Exception\DoActionException($e->getMessage(), $e->getCode(), $e);
         }
 
-        $result = new TransitionResult($entryId, $manager, $wf, $input);
+        $result = new TransitionResult($entryId, $manager, $wf, $transientVars);
         if ($viewName) {
             $result->setViewName($viewName);
         }
@@ -129,15 +131,15 @@ class Workflow
     /**
      * Создание процесса workflow
      *
-     * @param $managerName
-     * @param $workflowName
-     * @param $actionName
+     * @param                        $managerName
+     * @param                        $workflowName
+     * @param                        $actionName
      *
-     * @throws \OldTown\Workflow\ZF2\Service\Exception\InvalidInitializeWorkflowEntryException
+     * @param TransientVarsInterface $transientVars
      *
      * @return TransitionResultInterface
      */
-    public function initialize($managerName, $workflowName, $actionName)
+    public function initialize($managerName, $workflowName, $actionName, TransientVarsInterface $transientVars = null)
     {
         try {
             $event = new WorkflowEvent();
@@ -163,9 +165,11 @@ class Workflow
                 throw new Exception\ActionNotFoundException($errMsg);
             }
 
-            $input = new BaseTransientVars();
-            $event->setTransientVars($input);
-            $entryId = $manager->initialize($workflowName, $actionId, $input);
+            if (null === $transientVars) {
+                $transientVars = new BaseTransientVars();
+            }
+            $event->setTransientVars($transientVars);
+            $entryId = $manager->initialize($workflowName, $actionId, $transientVars);
             $event->setEntryId($entryId);
 
             $this->getEventManager()->trigger(WorkflowEvent::EVENT_WORKFLOW_INITIALIZE, $this, $event);
@@ -182,7 +186,7 @@ class Workflow
             throw new Exception\InvalidInitializeWorkflowEntryException($e->getMessage(), $e->getCode(), $e);
         }
 
-        $result = new TransitionResult($entryId, $manager, $wf, $input);
+        $result = new TransitionResult($entryId, $manager, $wf, $transientVars);
         if ($viewName) {
             $result->setViewName($viewName);
         }
@@ -198,9 +202,6 @@ class Workflow
      *
      * @return WorkflowInterface
      *
-     * @throws \OldTown\Workflow\ZF2\Service\Exception\InvalidWorkflowManagerException
-     * @throws \OldTown\Workflow\ZF2\Service\Exception\InvalidManagerNameException
-     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
      */
     public function getWorkflowManager($managerName)
     {

@@ -17,7 +17,7 @@ use OldTown\Workflow\ZF2\Options\ModuleOptions;
 use OldTown\Workflow\WorkflowInterface;
 use OldTown\Workflow\Config\ConfigurationInterface;
 use OldTown\Workflow\Loader\WorkflowFactoryInterface;
-use OldTown\Workflow\ZF2\Service\Workflow;
+use OldTown\Workflow\ZF2\ServiceEngine\Workflow;
 use OldTown\Workflow\ZF2\Event\WorkflowManagerEvent;
 
 
