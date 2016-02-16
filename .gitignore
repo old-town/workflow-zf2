@@ -18,3 +18,5 @@ temp/
 # Legacy ZF1
 demos/
 extras/documentation
+
+.idea
