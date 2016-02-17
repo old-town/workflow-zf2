@@ -16,13 +16,14 @@ use OldTown\Workflow\TransientVars\BaseTransientVars;
 use OldTown\Workflow\ZF2\Event\WorkflowEvent;
 use OldTown\Workflow\ZF2\ServiceEngine\Workflow\TransitionResult;
 use OldTown\Workflow\ZF2\ServiceEngine\Workflow\TransitionResultInterface;
+use OldTown\Workflow\ZF2\Options\ModuleOptions;
 
 /**
  * Class Workflow
  *
  * @package OldTown\Workflow\ZF2\ServiceEngine
  */
-class Workflow
+class Workflow implements WorkflowServiceInterface
 {
     use ServiceLocatorAwareTrait, EventManagerAwareTrait;
 
@@ -34,10 +35,18 @@ class Workflow
     protected $workflowManagerServiceNamePattern = 'workflow.manager.%s';
 
     /**
+     * Конфигурация модуля
+     *
+     * @var ModuleOptions
+     */
+    protected $moduleOptions;
+
+    /**
      * @param $options
      *
      * @throws \Zend\Stdlib\Exception\InvalidArgumentException
      * @throws \OldTown\Workflow\ZF2\Service\Exception\InvalidArgumentException
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidArgumentException
      */
     public function __construct($options)
     {
@@ -51,6 +60,7 @@ class Workflow
      *
      * @throws \Zend\Stdlib\Exception\InvalidArgumentException
      * @throws \OldTown\Workflow\ZF2\Service\Exception\InvalidArgumentException
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidArgumentException
      */
     protected function init($options)
     {
@@ -66,6 +76,12 @@ class Workflow
             throw new Exception\InvalidArgumentException($errMsg);
         }
         $this->setServiceLocator($options['serviceLocator']);
+
+        if (!array_key_exists('moduleOptions', $options)) {
+            $errMsg = 'Argument moduleOptions not found';
+            throw new Exception\InvalidArgumentException($errMsg);
+        }
+        $this->setModuleOptions($options['moduleOptions']);
     }
 
     /**
@@ -78,6 +94,8 @@ class Workflow
      * @param TransientVarsInterface $transientVars
      *
      * @return TransitionResultInterface
+     *
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\DoActionException
      */
     public function doAction($managerName, $entryId, $actionName, TransientVarsInterface $transientVars = null)
     {
@@ -138,6 +156,8 @@ class Workflow
      * @param TransientVarsInterface $transientVars
      *
      * @return TransitionResultInterface
+     *
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidInitializeWorkflowEntryException
      */
     public function initialize($managerName, $workflowName, $actionName, TransientVarsInterface $transientVars = null)
     {
@@ -194,6 +214,31 @@ class Workflow
         return $result;
     }
 
+    /**
+     * Конфигурация модуля
+     *
+     * @return ModuleOptions
+     */
+    public function getModuleOptions()
+    {
+        return $this->moduleOptions;
+    }
+
+    /**
+     * Устанавливает конфигурацию модуля
+     *
+     * @param ModuleOptions $moduleOptions
+     *
+     * @return $this
+     */
+    public function setModuleOptions(ModuleOptions $moduleOptions)
+    {
+        $this->moduleOptions = $moduleOptions;
+
+        return $this;
+    }
+
+
 
     /**
      * Получение менеджера workflow по имени
@@ -202,6 +247,9 @@ class Workflow
      *
      * @return WorkflowInterface
      *
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidManagerNameException
+     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidWorkflowManagerException
      */
     public function getWorkflowManager($managerName)
     {
@@ -299,5 +347,55 @@ class Workflow
         $this->workflowManagerServiceNamePattern = (string)$workflowManagerServiceNamePattern;
 
         return $this;
+    }
+
+    /**
+     * Возвращает имя менеджера по его пседовниму
+     *
+     * @param $alias
+     *
+     * @return string
+     *
+     * @throws Exception\InvalidWorkflowManagerAliasException
+     */
+    public function getManagerNameByAlias($alias)
+    {
+        $aliasMap = $this->getModuleOptions()->getManagerAliases();
+        if (!array_key_exists($alias, $aliasMap)) {
+            $errMsg = sprintf('Invalid workflow manager alias: %s', $alias);
+            throw new Exception\InvalidWorkflowManagerAliasException($errMsg);
+        }
+
+        return $aliasMap[$alias];
+    }
+
+
+    /**
+     * Проверяет есть ли псевдоним для менеджера workflow
+     *
+     * @param string $alias
+     *
+     * @return boolean
+     */
+    public function hasWorkflowManagerAlias($alias)
+    {
+        $aliasMap = $this->getModuleOptions()->getManagerAliases();
+        return array_key_exists($alias, $aliasMap);
+    }
+
+    /**
+     * @param $alias
+     *
+     * @return WorkflowInterface
+     *
+     * @throws Exception\InvalidWorkflowManagerAliasException
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidManagerNameException
+     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidWorkflowManagerException
+     */
+    public function getWorkflowManagerByAlias($alias)
+    {
+        $name = $this->getManagerNameByAlias($alias);
+        return $this->getWorkflowManager($name);
     }
 }

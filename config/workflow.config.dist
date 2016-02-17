@@ -44,6 +44,10 @@ return [
                 'configuration' => 'default',
                 'name' => BasicWorkflow::class
             ]
+        ],
+        'manager_aliases' => [
+            'aliases1' => 'test_create_manager',
+            'aliases2' => 'test_create_manager',
         ]
     ]
 ];

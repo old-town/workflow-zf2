@@ -10,12 +10,14 @@ use Zend\ServiceManager\MutableCreationOptionsInterface;
 use Zend\ServiceManager\MutableCreationOptionsTrait;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use OldTown\Workflow\ZF2\ServiceEngine\Workflow;
+use OldTown\Workflow\ZF2\Options\ModuleOptions;
 
 
 /**
  * Class WorkflowServiceFactory
  *
  * @package OldTown\Workflow\ZF2\Factory
+ *
  */
 class WorkflowServiceFactory implements FactoryInterface, MutableCreationOptionsInterface
 {
@@ -28,15 +30,20 @@ class WorkflowServiceFactory implements FactoryInterface, MutableCreationOptions
      *
      * @throws \Zend\Stdlib\Exception\InvalidArgumentException
      * @throws \OldTown\Workflow\ZF2\Service\Exception\InvalidArgumentException
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidArgumentException
+     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
      */
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
+
+        /** @var ModuleOptions $moduleOptions */
+        $moduleOptions = $serviceLocator->get(ModuleOptions::class);
+
         $options = [
-            'serviceLocator' => $serviceLocator
+            'serviceLocator' => $serviceLocator,
+            'moduleOptions'  => $moduleOptions
         ];
 
-        $w = new Workflow($options);
-
-        return $w;
+        return new Workflow($options);
     }
 }
