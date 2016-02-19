@@ -75,32 +75,4 @@ interface WorkflowServiceInterface
      * @return bool
      */
     public function hasWorkflowManager($workflowManagerName);
-
-    /**
-     * Возвращает имя менеджера по его пседовниму
-     *
-     * @param $alias
-     *
-     * @return string
-     *
-     */
-    public function getManagerNameByAlias($alias);
-
-
-    /**
-     * Проверяет есть ли псевдоним для менеджера workflow
-     *
-     * @param string $alias
-     *
-     * @return boolean
-     */
-    public function hasWorkflowManagerAlias($alias);
-
-    /**
-     * @param $alias
-     *
-     * @return WorkflowInterface
-     *
-     */
-    public function getWorkflowManagerByAlias($alias);
 }

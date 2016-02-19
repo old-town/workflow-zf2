@@ -32,9 +32,6 @@ $config = [
         ],
         'managers' => [
 
-        ],
-        'manager_aliases' => [
-
         ]
     ]
 ];
