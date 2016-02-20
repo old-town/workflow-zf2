@@ -29,6 +29,13 @@ class ModuleOptions extends AbstractOptions
     protected $configurations;
 
     /**
+     * Псевдонимы для имен менеджеров wf
+     *
+     * @var array
+     */
+    protected $managerAliases = [];
+
+    /**
      * @return array
      */
     public function getManagers()
@@ -67,6 +74,31 @@ class ModuleOptions extends AbstractOptions
 
         return $this;
     }
+
+    /**
+     * Псевдонимы для имен менеджеров wf
+     *
+     * @return array
+     */
+    public function getManagerAliases()
+    {
+        return $this->managerAliases;
+    }
+
+    /**
+     * Устанавливает псевдонимы для имен менеджеров wf
+     *
+     * @param array $managerAliases
+     *
+     * @return $this
+     */
+    public function setManagerAliases(array $managerAliases = [])
+    {
+        $this->managerAliases = $managerAliases;
+
+        return $this;
+    }
+
 
     /**
      * Возвращает настройки менеджера по его имени
