@@ -4,7 +4,6 @@
 [![Build Status](https://secure.travis-ci.org/old-town/workflow-zf2.svg?branch=dev)](https://secure.travis-ci.org/old-town/workflow-zf2)
 [![Coverage Status](https://coveralls.io/repos/old-town/workflow-zf2/badge.svg?branch=dev&service=github)](https://coveralls.io/github/old-town/workflow-zf2?branch=dev)
 
-
 Модуль предоставляет возможность конфигурировать workflow через стандартный механизм конфигов ZF2. Также в модуле
 реализован сервис предоставляющий возможность удобной работы с базовым функционалом workflow. 
 
