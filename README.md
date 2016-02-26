@@ -20,15 +20,4 @@ Develop:
 - [Online documentation](http://workflow-zf2.readthedocs.org/ru/dev/)
 - [Documentation source files](doc/book/ru/)
 
-
-
-
-## Оглавление ##
-
-* [Менеджер workflow](doc/ru/workflow-manager.md)
-* [ArrayWorkflowFactory](doc/ru/array-workflow-factory.md)  - использование  ArrayWorkflowFactory, для создания менеджера workflow
-* [WorkflowService](doc/ru/workflow-service.md)  - сервис для работы с workflow
-* [BasicWorkflow](doc/ru/basic-workflow.md)  - менеджер workflow
-
-
  
