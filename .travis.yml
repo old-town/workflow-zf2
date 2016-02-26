@@ -11,13 +11,6 @@ matrix:
     - php: 5.6
       env:
         - EXECUTE_TEST_COVERALLS=true
-    - php: 7
-    - php: hhvm
-  allow_failures:
-    - php: 7
-    - php: hhvm
-      env:
-        - DISABLE_ADD_TRAVIS_PHP_INI=true
 
 cache:
   directories:
@@ -32,16 +25,21 @@ before_install:
 install:
   - travis_retry composer install --no-interaction --ignore-platform-reqs
 
+before_script:
+  - mysql -e 'create database test_database_name;'
+
 script:
-  - if [[ $EXECUTE_TEST_COVERALLS == 'true' ]]; then ./vendor/bin/phpunit --configuration $TRAVIS_BUILD_DIR/phpunit.xml.travis --coverage-php $TRAVIS_BUILD_DIR/.reports/coverage/coverage-phpunit.cov; fi
+  - if [[ $EXECUTE_TEST_COVERALLS == 'true' ]]; then ./vendor/bin/phpunit --configuration $TRAVIS_BUILD_DIR/phpunit.xml.travis --coverage-php $TRAVIS_BUILD_DIR/build/logs/coverage/coverage-phpunit.cov; fi
   - if [[ $EXECUTE_TEST_COVERALLS != 'true' ]]; then ./vendor/bin/phpunit --configuration $TRAVIS_BUILD_DIR/phpunit.xml.travis ; fi
   - if [[ $EXECUTE_CS_CHECK == 'true' ]]; then  ./vendor/bin/php-cs-fixer fix -v --diff --dry-run --config-file ./.php_cs ; fi
 
 after_script:
-  - if [[ $EXECUTE_TEST_COVERALLS == 'true' ]]; then ./vendor/bin/phpcov merge --clover .reports/clover.xml .reports/coverage ; fi
-  - if [[ $EXECUTE_TEST_COVERALLS == 'true' ]]; then ./vendor/bin/coveralls -v --config .coveralls.yml ; fi
-
+  - if [[ $EXECUTE_TEST_COVERALLS == 'true' ]]; then ./vendor/bin/phpcov merge --clover $TRAVIS_BUILD_DIR/build/logs/clover.xml $TRAVIS_BUILD_DIR/build/logs/coverage ; fi
+  - if [[ $EXECUTE_TEST_COVERALLS == 'true' ]]; then ./vendor/bin/coveralls -v --config .coveralls.yml --coverage_clover=$TRAVIS_BUILD_DIR/build/logs/clover.xml; fi
 
 notifications:
   email:
   - and-rey2@yandex.ru
+
+services:
+  - mysql

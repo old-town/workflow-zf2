@@ -1,0 +1,12 @@
+docs_dir: doc/book/ru
+pages:
+    - index.md
+    - 'Интеграция OTWorkflow c Zend Framework':
+      - 'Менеджер workflow': 'workflow-manager.md'
+      - 'Использование  ArrayWorkflowFactory, для создания менеджера workflow': 'array-workflow-factory.md'
+      - 'WorkflowService - сервис для работы с workflow': 'workflow-service.md'
+      - 'BasicWorkflow - менеджер workflow': 'basic-workflow.md'
+site_name: workflow-zf2
+site_description: 'Интеграция OTWorkflow c Zend Framework'
+repo_url: 'https://github.com/old-town/workflow-zf2'
+copyright: 'Copyright (c) 2016 <a href="https://github.com/old-town/">OldTown</a>'

@@ -24,7 +24,7 @@
         </blacklist>
     </filter>
     <logging>
-        <log type="coverage-php" target="./.reports/coverage/coverage-phpunit.cov"/>
+        <log type="coverage-php" target="./build/logs/coverage/coverage-phpunit.cov"/>
     </logging>
 
 </phpunit>
