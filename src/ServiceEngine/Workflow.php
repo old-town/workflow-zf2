@@ -384,6 +384,8 @@ class Workflow implements WorkflowServiceInterface
     }
 
     /**
+     * Получение менеджера workflow по его псевдониму
+     *
      * @param $alias
      *
      * @return WorkflowInterface
