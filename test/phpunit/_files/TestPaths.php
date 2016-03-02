@@ -41,4 +41,15 @@ class TestPaths
     {
         return __DIR__ . '/../_files/CreateWorkflowFromConfig/config/';
     }
+
+
+    /**
+     * Путь до директории содержащей конфиги для сервиса workflow
+     *
+     * @return string
+     */
+    public static function getPathToWorkflowServiceConfig()
+    {
+        return __DIR__ . '/../_files/WorkflowService/config/';
+    }
 }
