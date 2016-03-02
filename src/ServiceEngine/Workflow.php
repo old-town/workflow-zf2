@@ -151,6 +151,44 @@ class Workflow implements WorkflowServiceInterface
     }
 
     /**
+     * Возвращает доступные действия для текущего состояния процесса
+     *
+     * @param $managerName
+     * @param $entryId
+     *
+     * @return array|ActionDescriptor[]
+     *
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidManagerNameException
+     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidWorkflowManagerException
+     * @throws \OldTown\Workflow\Exception\ArgumentNotNumericException
+     */
+    public function getAvailableActions($managerName, $entryId)
+    {
+        $manager = $this->getWorkflowManager($managerName);
+        $currentSteps = $manager->getCurrentSteps($entryId);
+
+        $entry = $manager->getConfiguration()->getWorkflowStore()->findEntry($entryId);
+        $workflowName = $entry->getWorkflowName();
+
+        $wf = $manager->getConfiguration()->getWorkflow($workflowName);
+
+        $findActions = [];
+        foreach ($currentSteps as $currentStep) {
+            $stepId = $currentStep->getStepId();
+            $step = $wf->getStep($stepId);
+            $actions = $step->getActions();
+
+            foreach ($actions as $action) {
+                $findActions[] = $action;
+            }
+        }
+
+        return $findActions;
+    }
+
+
+    /**
      * Ишет действие по имени. Поиск происходит в рамках текущего step'a.
      *
      * @param $managerName
@@ -168,33 +206,20 @@ class Workflow implements WorkflowServiceInterface
      */
     public function findActionByNameForEntry($managerName, $entryId, $actionName)
     {
-        $manager = $this->getWorkflowManager($managerName);
-        $currentSteps = $manager->getCurrentSteps($entryId);
-
-        $entry = $manager->getConfiguration()->getWorkflowStore()->findEntry($entryId);
-        $workflowName = $entry->getWorkflowName();
-
-        $wf = $manager->getConfiguration()->getWorkflow($workflowName);
-
+        $actions = $this->getAvailableActions($managerName, $entryId);
         $findActions = [];
-        foreach ($currentSteps as $currentStep) {
-            $stepId = $currentStep->getStepId();
-            $step = $wf->getStep($stepId);
-            $actions = $step->getActions();
-
-            foreach ($actions as $action) {
-                if ($actionName === $action->getName()) {
-                    $findActions[] = $action;
-                }
+        foreach ($actions as $action) {
+            if ($actionName === $action->getName()) {
+                $findActions[] = $action;
             }
         }
+
 
         $countActions = count($findActions);
         if ($countActions > 1) {
             $errMsg = sprintf(
-                'Found more than one action workflow. Manager name: %s. Workflow name: %s. Name action: %s. Ids: %s',
+                'Found more than one action workflow. Manager name: %s. Name action: %s. Ids: %s',
                 $managerName,
-                $workflowName,
                 $actionName,
                 implode(',', array_map(function ($action) {
                     return is_object($action) && method_exists($action, 'getId') ? call_user_func([$action, 'getId']) : '';
