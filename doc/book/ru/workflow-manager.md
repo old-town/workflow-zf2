@@ -1,9 +1,9 @@
 # Создание менеджера workflow 
 Создание и настройка менеджера workflow (объекта реализующего интерфейс \OldTown\Workflow\WorkflowInterface) 
-происходит через абстрактую фабрику  [AbstractWorkflowFactory](src/Factory/AbstractWorkflowFactory.php).
+происходит через абстрактую фабрику \OldTown\Workflow\ZF2\Factory\AbstractWorkflowFactory.
 
-Для работый работы [AbstractWorkflowFactory](src/Factory/AbstractWorkflowFactory.php) необходимо описать конфигурацию
-менеджера workflow в конфигурационных файлах приложения. В качестве примера можно использовать файл [workflow.config.dist](config/workflow.config.dist).
+Для работый работы \OldTown\Workflow\ZF2\Factory\AbstractWorkflowFactory необходимо описать конфигурацию
+менеджера workflow в конфигурационных файлах приложения. В качестве примера можно использовать файл [workflow.config.dist](https://raw.githubusercontent.com/old-town/workflow-zf2/master/config/workflow.config.dist).
 
 # Описание структуры конфига 
 
