@@ -17,6 +17,7 @@ use OldTown\Workflow\ZF2\Event\WorkflowEvent;
 use OldTown\Workflow\ZF2\ServiceEngine\Workflow\TransitionResult;
 use OldTown\Workflow\ZF2\ServiceEngine\Workflow\TransitionResultInterface;
 use OldTown\Workflow\ZF2\Options\ModuleOptions;
+use OldTown\Workflow\Loader\ActionDescriptor;
 
 /**
  * Class Workflow
@@ -115,7 +116,10 @@ class Workflow implements WorkflowServiceInterface
             $wf = $manager->getConfiguration()->getWorkflow($workflowName);
             $event->setWorkflow($wf);
 
-            $action = $this->getActionByName($wf, $actionName);
+            //$action = $this->getActionByName($wf, $actionName);
+            $action = $this->findActionByNameForEntry($managerName, $entryId, $actionName);
+
+
             $actionId = $action->getId();
 
             if (null === $transientVars) {
@@ -144,6 +148,92 @@ class Workflow implements WorkflowServiceInterface
         }
 
         return $result;
+    }
+
+    /**
+     * Возвращает доступные действия для текущего состояния процесса
+     *
+     * @param $managerName
+     * @param $entryId
+     *
+     * @return array|ActionDescriptor[]
+     *
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidManagerNameException
+     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidWorkflowManagerException
+     * @throws \OldTown\Workflow\Exception\ArgumentNotNumericException
+     */
+    public function getAvailableActions($managerName, $entryId)
+    {
+        $manager = $this->getWorkflowManager($managerName);
+        $currentSteps = $manager->getCurrentSteps($entryId);
+
+        $entry = $manager->getConfiguration()->getWorkflowStore()->findEntry($entryId);
+        $workflowName = $entry->getWorkflowName();
+
+        $wf = $manager->getConfiguration()->getWorkflow($workflowName);
+
+        $findActions = [];
+        foreach ($currentSteps as $currentStep) {
+            $stepId = $currentStep->getStepId();
+            $step = $wf->getStep($stepId);
+            $actions = $step->getActions();
+
+            foreach ($actions as $action) {
+                $findActions[] = $action;
+            }
+        }
+
+        return $findActions;
+    }
+
+
+    /**
+     * Ишет действие по имени. Поиск происходит в рамках текущего step'a.
+     *
+     * @param $managerName
+     * @param $entryId
+     * @param $actionName
+     *
+     * @return ActionDescriptor|null
+     *
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidManagerNameException
+     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidWorkflowManagerException
+     * @throws \OldTown\Workflow\Exception\ArgumentNotNumericException
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidWorkflowActionNameException
+     * @throws \OldTown\Workflow\Exception\FactoryException
+     */
+    public function findActionByNameForEntry($managerName, $entryId, $actionName)
+    {
+        $actions = $this->getAvailableActions($managerName, $entryId);
+        $findActions = [];
+        foreach ($actions as $action) {
+            if ($actionName === $action->getName()) {
+                $findActions[] = $action;
+            }
+        }
+
+
+        $countActions = count($findActions);
+        if ($countActions > 1) {
+            $errMsg = sprintf(
+                'Found more than one action workflow. Manager name: %s. Name action: %s. Ids: %s',
+                $managerName,
+                $actionName,
+                implode(',', array_map(function ($action) {
+                    return is_object($action) && method_exists($action, 'getId') ? call_user_func([$action, 'getId']) : '';
+                }, $findActions))
+            );
+
+            throw new Exception\InvalidWorkflowActionNameException($errMsg);
+        }
+        $findAction = null;
+        if (1 === $countActions) {
+            reset($findActions);
+            $findAction = current($findActions);
+        }
+        return $findAction;
     }
 
     /**
@@ -269,11 +359,14 @@ class Workflow implements WorkflowServiceInterface
         return $manager;
     }
 
+
+
+
     /**
      * @param WorkflowDescriptor $wf
      * @param                    $actionName
      *
-     * @return null|\OldTown\Workflow\Loader\ActionDescriptor
+     * @return null|ActionDescriptor
      */
     public function getActionByName(WorkflowDescriptor $wf, $actionName)
     {

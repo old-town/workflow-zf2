@@ -1,6 +1,6 @@
 # Сервис для работы с workflow
 
-Сервис [Workflow](./../../src/Service/Workflow.php) предоставляет базовый функционал для работы с workflow.
+Сервис \OldTown\Workflow\ZF2\ServiceEngine\Workflow предоставляет базовый функционал для работы с workflow.
 
 ## Получение сервиса
 
@@ -47,11 +47,11 @@
 
 Сервис имеет своей менеджер событий. Во время работые сервиса, могут бросаться события позволяющие взаймодействовать с
 сервисом из других модулей. Для передачи информации о событии, используется объект события инстанцированного от класса
-[WorkflowEvent](./../../src/Event/WorkflowEvent.php). Сервис бросает следующие события:
+\OldTown\Workflow\ZF2\Event\WorkflowEvent. Сервис бросает следующие события:
 
 ### workflow.manager.create
   Событие бросается при создание нового менеджера workflow(объект реализующий интерфейс \OldTown\Workflow\WorkflowInterface).
-  Бросаемое событие инкапуслировано от класса [WorkflowManagerEvent](./../../src/Event/WorkflowManagerEvent.php). Собыите 
+  Бросаемое событие инкапуслировано от класса \OldTown\Workflow\ZF2\Event\WorkflowManagerEvent. Собыите 
   содержит следующую информацию:
   
   * workflowManager - менеджер workflow. Объект реализующий интерфейс \OldTown\Workflow\WorkflowInterface
@@ -69,12 +69,12 @@
  
 ### Объект события сервиса
  Для взаимодействия с другими модулями, используется менеджер событий. События бросамые сервисом инкапсулированы от класса
- [WorkflowEvent](./../../src/Event/WorkflowEvent.php). Событие содержит следующую информацию:
+ \OldTown\Workflow\ZF2\Event\WorkflowEvent. Событие содержит следующую информацию:
  
- * workflow - дескриптор описывающий workflow. Объект реализующий \OldTown\Workflow\Loader\WorkflowDescriptor
- * transientVars - переменные времени выполнения workflow. Там содержаться результаты работы workflow
- * viewName - имя вида, используется для отображения результатов работы workflow в интегрируемой системе. 
- * workflowManager - менеджер workflow. Объект реализующий интерфейс \OldTown\Workflow\WorkflowInterface
- * entryId - идендификатор запущенного процесса workflow
+ - workflow - дескриптор описывающий workflow. Объект реализующий \OldTown\Workflow\Loader\WorkflowDescriptor
+ - transientVars - переменные времени выполнения workflow. Там содержаться результаты работы workflow
+ - viewName - имя вида, используется для отображения результатов работы workflow в интегрируемой системе. 
+ - workflowManager - менеджер workflow. Объект реализующий интерфейс \OldTown\Workflow\WorkflowInterface
+ - entryId - идендификатор запущенного процесса workflow
 
  

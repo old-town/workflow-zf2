@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE workflow PUBLIC "-//OpenSymphony Group//DTD OSWorkflow 2.6//EN"
+        "http://www.opensymphony.com/osworkflow/workflow_2_8.dtd">
+<workflow>
+    <initial-actions>
+        <action id="100" name="startWorkflow">
+            <results>
+                <unconditional-result old-status="Finished" status="Underway" step="10"/>
+            </results>
+        </action>
+    </initial-actions>
+    <steps>
+        <step id="10" name="step1">
+            <actions>
+                <action id="1010" name="testAction">
+                    <results>
+                        <unconditional-result old-status="Finished" status="Underway"  step="20"/>
+                    </results>
+                </action>
+            </actions>
+        </step>
+        <step id="20" name="step2">
+            <actions>
+                <action id="2010" name="testAction">
+                    <results>
+                        <unconditional-result old-status="Finished" status="Underway"  step="20"/>
+                    </results>
+                </action>
+            </actions>
+        </step>
+    </steps>
+</workflow>
