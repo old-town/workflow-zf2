@@ -8,25 +8,29 @@ namespace OldTown\Workflow\ZF2\ServiceEngine;
 use OldTown\Workflow\Loader\WorkflowDescriptor;
 use OldTown\Workflow\TransientVars\TransientVarsInterface;
 use OldTown\Workflow\WorkflowInterface;
+use OldTown\Workflow\ZF2\ServiceEngine\Workflow\TransitionCompletedResultInterface;
+use OldTown\Workflow\ZF2\ServiceEngine\Workflow\TransitionErrorResultInterface;
+use OldTown\Workflow\ZF2\Transaction\WorkflowTransactionEvent;
+use OldTown\Workflow\ZF2\Transaction\WorkflowTransactionEventInterface;
 use Zend\EventManager\EventManagerAwareTrait;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
-use Traversable;
-use Zend\Stdlib\ArrayUtils;
+use ReflectionClass;
+use Zend\ServiceManager\ServiceLocatorInterface;
 use OldTown\Workflow\TransientVars\BaseTransientVars;
 use OldTown\Workflow\ZF2\Event\WorkflowEvent;
-use OldTown\Workflow\ZF2\ServiceEngine\Workflow\TransitionResult;
+use OldTown\Workflow\ZF2\ServiceEngine\Workflow\TransitionCompletedResult;
 use OldTown\Workflow\ZF2\ServiceEngine\Workflow\TransitionResultInterface;
-use OldTown\Workflow\ZF2\Options\ModuleOptions;
 use OldTown\Workflow\Loader\ActionDescriptor;
+use OldTown\Workflow\ZF2\Transaction\WorkflowTransactionServiceInterface;
+
 
 /**
  * Class Workflow
  *
  * @package OldTown\Workflow\ZF2\ServiceEngine
  */
-class Workflow implements WorkflowServiceInterface
+class Workflow implements WorkflowServiceInterface, WorkflowTransactionServiceInterface
 {
-    use ServiceLocatorAwareTrait, EventManagerAwareTrait;
+    use EventManagerAwareTrait;
 
     /**
      * Паттерн для получения имени сервиса workflow
@@ -36,53 +40,58 @@ class Workflow implements WorkflowServiceInterface
     protected $workflowManagerServiceNamePattern = 'workflow.manager.%s';
 
     /**
-     * Конфигурация модуля
+     * Контейнер для получения экземпляров workflow
      *
-     * @var ModuleOptions
+     * @var ServiceLocatorInterface
      */
-    protected $moduleOptions;
+    protected $workflowContainer;
 
     /**
-     * @param $options
+     * Псевдонимы для менеджеров workflow
      *
-     * @throws \Zend\Stdlib\Exception\InvalidArgumentException
-     * @throws \OldTown\Workflow\ZF2\Service\Exception\InvalidArgumentException
-     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidArgumentException
+     * @var array
      */
-    public function __construct($options)
-    {
-        $this->init($options);
-    }
+    protected $managerAliases = [];
 
     /**
-     * Инициализация сервиса
+     * Имя класса  - реализующего событие используемое для работы с транзакциями
      *
-     * @param $options
-     *
-     * @throws \Zend\Stdlib\Exception\InvalidArgumentException
-     * @throws \OldTown\Workflow\ZF2\Service\Exception\InvalidArgumentException
-     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidArgumentException
+     * @var string
      */
-    protected function init($options)
+    protected $workflowTransactionEventClassName = WorkflowTransactionEvent::class;
+
+    /**
+     * Имя класса реализующего интерфейс описывающий результаты успешного запуска Workflow
+     *
+     * @var string
+     */
+    protected $transitionCompletedResultClassName = TransitionCompletedResult::class;
+
+
+    /**
+     * Имя класса реализующего интерфейс описывающий результаты не успешного запуска Workflow
+     *
+     * @var string
+     */
+    protected $transitionErrorResultClassName = TransitionCompletedResult::class;
+
+    /**
+     * Список добавляемых идендификаторов в EventManager
+     *
+     * @var array
+     */
+    protected $eventIdentifier = [
+        WorkflowTransactionServiceInterface::class
+    ];
+
+    /**
+     * Workflow constructor.
+     *
+     * @param ServiceLocatorInterface $workflowContainer
+     */
+    public function __construct(ServiceLocatorInterface $workflowContainer)
     {
-        if ($options instanceof Traversable) {
-            $options = ArrayUtils::iteratorToArray($options);
-        } elseif (!is_array($options)) {
-            $errMsg = sprintf('%s  expects an array or Traversable config', __METHOD__);
-            throw new Exception\InvalidArgumentException($errMsg);
-        }
-
-        if (!array_key_exists('serviceLocator', $options)) {
-            $errMsg = 'Argument serviceLocator not found';
-            throw new Exception\InvalidArgumentException($errMsg);
-        }
-        $this->setServiceLocator($options['serviceLocator']);
-
-        if (!array_key_exists('moduleOptions', $options)) {
-            $errMsg = 'Argument moduleOptions not found';
-            throw new Exception\InvalidArgumentException($errMsg);
-        }
-        $this->setModuleOptions($options['moduleOptions']);
+        $this->setWorkflowContainer($workflowContainer);
     }
 
     /**
@@ -95,11 +104,15 @@ class Workflow implements WorkflowServiceInterface
      * @param TransientVarsInterface $transientVars
      *
      * @return TransitionResultInterface
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\RuntimeException
      *
      * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\DoActionException
      */
     public function doAction($managerName, $entryId, $actionName, TransientVarsInterface $transientVars = null)
     {
+        $eventManager = $this->getEventManager();
+        $transactionEvent = $this->workflowTransactionEventFactory();
+        $eventManager->trigger($transactionEvent);
         try {
             $event = new WorkflowEvent();
             $event->setTarget($this);
@@ -128,24 +141,39 @@ class Workflow implements WorkflowServiceInterface
 
             $event->setTransientVars($transientVars);
 
+            $transactionEvent->setState(WorkflowTransactionEventInterface::START_STATE);
+            $eventManager->trigger($transactionEvent);
+
             $manager->doAction($entryId, $actionId, $transientVars);
 
-            $this->getEventManager()->trigger(WorkflowEvent::EVENT_DO_ACTION, $this, $event);
+            $eventManager->trigger(WorkflowEvent::EVENT_DO_ACTION, $this, $event);
 
             $viewName = $action->getView();
             if (null !== $viewName) {
                 $event->setViewName($viewName);
                 $event->setName(WorkflowEvent::EVENT_RENDER);
-                $this->getEventManager()->trigger($event);
+                $eventManager->trigger($event);
             }
+
+            $result = $this->transitionCompletedResultFactory($entryId, $manager, $wf, $transientVars);
+
+            if ($viewName) {
+                $result->setViewName($viewName);
+            }
+
+            $transactionEvent->setState(WorkflowTransactionEventInterface::COMMIT_STATE);
+            $eventManager->trigger($transactionEvent);
         } catch (\Exception $e) {
-            throw new Exception\DoActionException($e->getMessage(), $e->getCode(), $e);
+            $transactionEvent->setState(WorkflowTransactionEventInterface::ROLLBACK_STATE);
+            $eventManager->trigger($transactionEvent);
+
+            if (false === $transactionEvent->getFlagSuppressException()) {
+                throw new Exception\DoActionException($e->getMessage(), $e->getCode(), $e);
+            }
+
+            $result = $this->transitionErrorResultFactory($e);
         }
 
-        $result = new TransitionResult($entryId, $manager, $wf, $transientVars);
-        if ($viewName) {
-            $result->setViewName($viewName);
-        }
 
         return $result;
     }
@@ -246,11 +274,15 @@ class Workflow implements WorkflowServiceInterface
      * @param TransientVarsInterface $transientVars
      *
      * @return TransitionResultInterface
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\RuntimeException
      *
      * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidInitializeWorkflowEntryException
      */
     public function initialize($managerName, $workflowName, $actionName, TransientVarsInterface $transientVars = null)
     {
+        $eventManager = $this->getEventManager();
+        $transactionEvent = $this->workflowTransactionEventFactory();
+        $eventManager->trigger($transactionEvent);
         try {
             $event = new WorkflowEvent();
             $event->setTarget($this);
@@ -279,10 +311,14 @@ class Workflow implements WorkflowServiceInterface
                 $transientVars = new BaseTransientVars();
             }
             $event->setTransientVars($transientVars);
+
+            $transactionEvent->setState(WorkflowTransactionEventInterface::START_STATE);
+            $eventManager->trigger($transactionEvent);
+
             $entryId = $manager->initialize($workflowName, $actionId, $transientVars);
             $event->setEntryId($entryId);
 
-            $this->getEventManager()->trigger(WorkflowEvent::EVENT_WORKFLOW_INITIALIZE, $this, $event);
+            $eventManager->trigger(WorkflowEvent::EVENT_WORKFLOW_INITIALIZE, $this, $event);
 
 
             $initialActions = $wf->getInitialAction($actionId);
@@ -290,43 +326,32 @@ class Workflow implements WorkflowServiceInterface
             if (null !== $viewName) {
                 $event->setViewName($viewName);
                 $event->setName(WorkflowEvent::EVENT_RENDER);
-                $this->getEventManager()->trigger($event);
+                $eventManager->trigger($event);
             }
+
+            $result = $this->transitionCompletedResultFactory($entryId, $manager, $wf, $transientVars);
+
+            if ($viewName) {
+                $result->setViewName($viewName);
+            }
+
+            $transactionEvent->setState(WorkflowTransactionEventInterface::COMMIT_STATE);
+            $eventManager->trigger($transactionEvent);
         } catch (\Exception $e) {
-            throw new Exception\InvalidInitializeWorkflowEntryException($e->getMessage(), $e->getCode(), $e);
+            $transactionEvent->setState(WorkflowTransactionEventInterface::ROLLBACK_STATE);
+            $eventManager->trigger($transactionEvent);
+
+            if (false === $transactionEvent->getFlagSuppressException()) {
+                throw new Exception\InvalidInitializeWorkflowEntryException($e->getMessage(), $e->getCode(), $e);
+            }
+
+            $result = $this->transitionErrorResultFactory($e);
         }
 
-        $result = new TransitionResult($entryId, $manager, $wf, $transientVars);
-        if ($viewName) {
-            $result->setViewName($viewName);
-        }
 
         return $result;
     }
 
-    /**
-     * Конфигурация модуля
-     *
-     * @return ModuleOptions
-     */
-    public function getModuleOptions()
-    {
-        return $this->moduleOptions;
-    }
-
-    /**
-     * Устанавливает конфигурацию модуля
-     *
-     * @param ModuleOptions $moduleOptions
-     *
-     * @return $this
-     */
-    public function setModuleOptions(ModuleOptions $moduleOptions)
-    {
-        $this->moduleOptions = $moduleOptions;
-
-        return $this;
-    }
 
 
 
@@ -349,7 +374,7 @@ class Workflow implements WorkflowServiceInterface
         }
         $workflowManagerServiceName = $this->getWorkflowManagerServiceName($managerName);
 
-        $manager =  $this->getServiceLocator()->get($workflowManagerServiceName);
+        $manager =  $this->getWorkflowContainer()->get($workflowManagerServiceName);
 
         if (!$manager instanceof WorkflowInterface) {
             $errMsg = sprintf('Workflow manager not implement %s', WorkflowInterface::class);
@@ -407,7 +432,7 @@ class Workflow implements WorkflowServiceInterface
     {
         $workflowManagerServiceName = $this->getWorkflowManagerServiceName($workflowManagerName);
 
-        return $this->getServiceLocator()->has($workflowManagerServiceName);
+        return $this->getWorkflowContainer()->has($workflowManagerServiceName);
     }
 
     /**
@@ -453,7 +478,7 @@ class Workflow implements WorkflowServiceInterface
      */
     public function getManagerNameByAlias($alias)
     {
-        $aliasMap = $this->getModuleOptions()->getManagerAliases();
+        $aliasMap = $this->getManagerAliases();
         if (!array_key_exists($alias, $aliasMap)) {
             $errMsg = sprintf('Invalid workflow manager alias: %s', $alias);
             throw new Exception\InvalidWorkflowManagerAliasException($errMsg);
@@ -472,7 +497,7 @@ class Workflow implements WorkflowServiceInterface
      */
     public function hasWorkflowManagerAlias($alias)
     {
-        $aliasMap = $this->getModuleOptions()->getManagerAliases();
+        $aliasMap = $this->getManagerAliases();
         return array_key_exists($alias, $aliasMap);
     }
 
@@ -492,5 +517,194 @@ class Workflow implements WorkflowServiceInterface
     {
         $name = $this->getManagerNameByAlias($alias);
         return $this->getWorkflowManager($name);
+    }
+
+    /**
+     * Возвращает контейнер для получения экземпляров workflow
+     *
+     * @return ServiceLocatorInterface
+     */
+    public function getWorkflowContainer()
+    {
+        return $this->workflowContainer;
+    }
+
+    /**
+     * Устанавливает контейнер для получения экземпляров workflow
+     *
+     * @param ServiceLocatorInterface $workflowContainer
+     *
+     * @return $this
+     */
+    public function setWorkflowContainer(ServiceLocatorInterface $workflowContainer)
+    {
+        $this->workflowContainer = $workflowContainer;
+
+        return $this;
+    }
+
+    /**
+     * Возвращает псевдонимы для менеджеров workflow
+     *
+     * @return array
+     */
+    public function getManagerAliases()
+    {
+        return $this->managerAliases;
+    }
+
+    /**
+     * Устанавливает псевдонимы для менеджеров workflow
+     *
+     * @param array $managerAliases
+     *
+     * @return $this
+     */
+    public function setManagerAliases(array $managerAliases)
+    {
+        $this->managerAliases = $managerAliases;
+
+        return $this;
+    }
+
+    /**
+     * Возвращает имя класса  - реализующего событие используемое для работы с транзакциями
+     *
+     * @return string
+     */
+    public function getWorkflowTransactionEventClassName()
+    {
+        return $this->workflowTransactionEventClassName;
+    }
+
+    /**
+     * Устанавливает имя класса  - реализующего событие используемое для работы с транзакциями
+     *
+     * @param string $workflowTransactionEventClassName
+     *
+     * @return $this
+     */
+    public function setWorkflowTransactionEventClassName($workflowTransactionEventClassName)
+    {
+        $this->workflowTransactionEventClassName = $workflowTransactionEventClassName;
+
+        return $this;
+    }
+
+    /**
+     * Фабрика для создания события имспользуемого для организации работоы с транзакциями
+
+     * @return WorkflowTransactionEventInterface
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\RuntimeException
+     */
+    protected function workflowTransactionEventFactory()
+    {
+        $className = $this->getWorkflowTransactionEventClassName();
+        $r = new ReflectionClass($className);
+        $event = $r->newInstance();
+
+        if (!$event instanceof WorkflowTransactionEventInterface) {
+            $errMsg = sprintf('Event not implement %s', WorkflowTransactionEventInterface::class);
+            throw new Exception\RuntimeException($errMsg);
+        }
+
+        return $event;
+    }
+
+    /**
+     * Возвращает имя класса реализующего интерфейс описывающий результаты успешного запуска Workflow
+     *
+     * @return string
+     */
+    public function getTransitionCompletedResultClassName()
+    {
+        return $this->transitionCompletedResultClassName;
+    }
+
+    /**
+     * Устанавливает имя класса реализующего интерфейс описывающий результаты успешного запуска Workflow
+     *
+     * @param string $transitionCompletedResultClassName
+     *
+     * @return $this
+     */
+    public function setTransitionCompletedResultClassName($transitionCompletedResultClassName)
+    {
+        $this->transitionCompletedResultClassName = $transitionCompletedResultClassName;
+
+        return $this;
+    }
+
+
+    /**
+     * Создает объект с результатами успешного запуска Workflow
+     *
+     * @param                        $entryId
+     * @param WorkflowInterface      $workflowManager
+     * @param WorkflowDescriptor     $workflow
+     * @param TransientVarsInterface $transientVars
+     *
+     * @return TransitionCompletedResultInterface
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\RuntimeException
+     */
+    protected function transitionCompletedResultFactory($entryId, WorkflowInterface $workflowManager, WorkflowDescriptor $workflow, TransientVarsInterface $transientVars)
+    {
+        $className = $this->getTransitionCompletedResultClassName();
+        $r = new ReflectionClass($className);
+        $event = $r->newInstance($entryId, $workflowManager, $workflow, $transientVars);
+
+        if (!$event instanceof TransitionCompletedResultInterface) {
+            $errMsg = sprintf('Transition result not implement %s', TransitionCompletedResultInterface::class);
+            throw new Exception\RuntimeException($errMsg);
+        }
+
+        return $event;
+    }
+
+    /**
+     * Возвращает имя класса реализующего интерфейс описывающий результаты не успешного запуска Workflow
+     *
+     * @return string
+     */
+    public function getTransitionErrorResultClassName()
+    {
+        return $this->transitionErrorResultClassName;
+    }
+
+    /**
+     * Устанавливает имя класса реализующего интерфейс описывающий результаты не успешного запуска Workflow
+     *
+     * @param string $transitionErrorResultClassName
+     *
+     * @return $this
+     */
+    public function setTransitionErrorResultClassName($transitionErrorResultClassName)
+    {
+        $this->transitionErrorResultClassName = $transitionErrorResultClassName;
+
+        return $this;
+    }
+
+
+    /**
+     * Создает объект с результатами не удавшегося запуска workflow
+     *
+     * @param \Exception $e
+     *
+     * @return TransitionErrorResultInterface
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\RuntimeException
+     */
+    protected function transitionErrorResultFactory(\Exception $e)
+    {
+        $className = $this->getTransitionErrorResultClassName();
+        $r = new ReflectionClass($className);
+        $event = $r->newInstance($e);
+
+        if (!$event instanceof TransitionErrorResultInterface) {
+            $errMsg = sprintf('Error transition result not implement %s', TransitionErrorResultInterface::class);
+            throw new Exception\RuntimeException($errMsg);
+        }
+
+        return $event;
     }
 }

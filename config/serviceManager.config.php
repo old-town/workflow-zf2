@@ -10,7 +10,7 @@ use OldTown\Workflow\ZF2\Options\ModuleOptionsFactory;
 use OldTown\Workflow\ZF2\Factory\AbstractWorkflowFactory;
 use OldTown\Workflow\Basic\BasicWorkflow;
 use OldTown\Workflow\ZF2\Factory\BasicWorkflowFactory;
-use OldTown\Workflow\ZF2\Factory\WorkflowServiceFactory;
+use OldTown\Workflow\ZF2\ServiceEngine\WorkflowFactory;
 use OldTown\Workflow\ZF2\ServiceEngine\Workflow;
 
 return [
@@ -18,7 +18,7 @@ return [
         'factories' => [
             ModuleOptions::class => ModuleOptionsFactory::class,
             BasicWorkflow::class => BasicWorkflowFactory::class,
-            Workflow::class => WorkflowServiceFactory::class
+            Workflow::class => WorkflowFactory::class
 
         ],
         'abstract_factories' => [

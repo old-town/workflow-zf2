@@ -23,8 +23,17 @@ class WorkflowServiceTest extends AbstractHttpControllerTestCase
      * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
      * @throws \Zend\ServiceManager\Exception\ServiceNotCreatedException
      * @throws \Zend\ServiceManager\Exception\RuntimeException
+     * @throws \Zend\Stdlib\Exception\LogicException
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\DoActionException
+     * @throws \OldTown\Workflow\Exception\ArgumentNotNumericException
+     * @throws \OldTown\Workflow\Exception\FactoryException
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidManagerNameException
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidWorkflowActionNameException
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidWorkflowManagerException
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidInitializeWorkflowEntryException
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\RuntimeException
      */
-    public function testCorrectResoleNameForDoAction()
+    public function testCorrectResolveNameForDoAction()
     {
         /** @noinspection PhpIncludeInspection */
         $applicationConfig = include TestPaths::getPathToDefaultAppConfig();
@@ -39,6 +48,7 @@ class WorkflowServiceTest extends AbstractHttpControllerTestCase
         /** @var Workflow $workflow */
         $workflow = $this->getApplicationServiceLocator()->get(Workflow::class);
 
+        /** @var Workflow\TransitionCompletedResultInterface $result */
         $result = $workflow->initialize($wfManager, $wfName, 'startWorkflow');
 
         $entryId = $result->getEntryId();

@@ -5,9 +5,8 @@
  */
 namespace OldTown\Workflow\ZF2\ServiceEngine\Workflow;
 
-use OldTown\Workflow\Loader\WorkflowDescriptor;
 use OldTown\Workflow\TransientVars\TransientVarsInterface;
-use OldTown\Workflow\WorkflowInterface;
+
 
 /**
  * Interface TransitionResultInterface
@@ -16,18 +15,6 @@ use OldTown\Workflow\WorkflowInterface;
  */
 interface TransitionResultInterface
 {
-    /**
-     * @return WorkflowDescriptor
-     */
-    public function getWorkflow();
-
-    /**
-     * @param WorkflowDescriptor $workflow
-     *
-     * @return $this
-     */
-    public function setWorkflow(WorkflowDescriptor $workflow);
-
     /**
      * @return TransientVarsInterface
      */
@@ -39,40 +26,4 @@ interface TransitionResultInterface
      * @return $this
      */
     public function setTransientVars(TransientVarsInterface $transientVars);
-
-    /**
-     * @return string
-     */
-    public function getViewName();
-
-    /**
-     * @param string $viewName
-     *
-     * @return $this
-     */
-    public function setViewName($viewName);
-
-    /**
-     * @return WorkflowInterface
-     */
-    public function getWorkflowManager();
-
-    /**
-     * @param WorkflowInterface $workflowManager
-     *
-     * @return $this
-     */
-    public function setWorkflowManager(WorkflowInterface $workflowManager);
-
-    /**
-     * @return int
-     */
-    public function getEntryId();
-
-    /**
-     * @param int $entryId
-     *
-     * @return $this
-     */
-    public function setEntryId($entryId);
 }
