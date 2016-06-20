@@ -15,7 +15,7 @@ use OldTown\Workflow\WorkflowInterface;
  *
  * @package OldTown\Workflow\ZF2\ServiceEngine\Workflow
  */
-class TransitionResult implements TransitionResultInterface
+class TransitionCompletedResult implements TransitionCompletedResultInterface
 {
     use TransitionResultTrait;
 

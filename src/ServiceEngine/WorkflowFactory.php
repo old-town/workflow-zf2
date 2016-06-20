@@ -3,23 +3,21 @@
  * @link https://github.com/old-town/workflow-zf2
  * @author  Malofeykin Andrey  <and-rey2@yandex.ru>
  */
-namespace  OldTown\Workflow\ZF2\Factory;
+namespace  OldTown\Workflow\ZF2\ServiceEngine;
 
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\MutableCreationOptionsInterface;
 use Zend\ServiceManager\MutableCreationOptionsTrait;
 use Zend\ServiceManager\ServiceLocatorInterface;
-use OldTown\Workflow\ZF2\ServiceEngine\Workflow;
 use OldTown\Workflow\ZF2\Options\ModuleOptions;
 
 
 /**
- * Class WorkflowServiceFactory
+ * Class WorkflowFactory
  *
- * @package OldTown\Workflow\ZF2\Factory
- *
+ * @package OldTown\Workflow\ZF2\ServiceEngine
  */
-class WorkflowServiceFactory implements FactoryInterface, MutableCreationOptionsInterface
+class WorkflowFactory implements FactoryInterface, MutableCreationOptionsInterface
 {
     use MutableCreationOptionsTrait;
 
@@ -39,11 +37,11 @@ class WorkflowServiceFactory implements FactoryInterface, MutableCreationOptions
         /** @var ModuleOptions $moduleOptions */
         $moduleOptions = $serviceLocator->get(ModuleOptions::class);
 
-        $options = [
-            'serviceLocator' => $serviceLocator,
-            'moduleOptions'  => $moduleOptions
-        ];
+        $workflowService = new Workflow($serviceLocator);
 
-        return new Workflow($options);
+        $workflowService->setManagerAliases($moduleOptions->getManagerAliases());
+
+
+        return $workflowService;
     }
 }

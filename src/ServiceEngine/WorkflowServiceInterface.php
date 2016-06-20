@@ -18,12 +18,6 @@ use OldTown\Workflow\ZF2\ServiceEngine\Workflow\TransitionResultInterface;
 interface WorkflowServiceInterface
 {
     /**
-     * @param $options
-     */
-    public function __construct($options);
-
-
-    /**
      * Запуск перехода из отдного состояния в другое
      *
      * @param                        $managerName
