@@ -112,8 +112,9 @@ class Workflow implements WorkflowServiceInterface, WorkflowTransactionServiceIn
     {
         $eventManager = $this->getEventManager();
         $transactionEvent = $this->workflowTransactionEventFactory();
-        $eventManager->trigger($transactionEvent);
         try {
+            $eventManager->trigger($transactionEvent);
+
             $event = new WorkflowEvent();
             $event->setTarget($this);
             $event->setEntryId($entryId);
@@ -170,6 +171,9 @@ class Workflow implements WorkflowServiceInterface, WorkflowTransactionServiceIn
             if (false === $transactionEvent->getFlagSuppressException()) {
                 throw new Exception\DoActionException($e->getMessage(), $e->getCode(), $e);
             }
+
+            $transitionErrorResult = $this->transitionErrorResultFactory($e);
+            $transitionErrorResult->setTransientVars($transientVars);
 
             $result = $this->transitionErrorResultFactory($e);
         }
@@ -282,8 +286,10 @@ class Workflow implements WorkflowServiceInterface, WorkflowTransactionServiceIn
     {
         $eventManager = $this->getEventManager();
         $transactionEvent = $this->workflowTransactionEventFactory();
-        $eventManager->trigger($transactionEvent);
+
         try {
+            $eventManager->trigger($transactionEvent);
+
             $event = new WorkflowEvent();
             $event->setTarget($this);
 
@@ -344,6 +350,8 @@ class Workflow implements WorkflowServiceInterface, WorkflowTransactionServiceIn
             if (false === $transactionEvent->getFlagSuppressException()) {
                 throw new Exception\InvalidInitializeWorkflowEntryException($e->getMessage(), $e->getCode(), $e);
             }
+            $transitionErrorResult = $this->transitionErrorResultFactory($e);
+            $transitionErrorResult->setTransientVars($transientVars);
 
             $result = $this->transitionErrorResultFactory($e);
         }
