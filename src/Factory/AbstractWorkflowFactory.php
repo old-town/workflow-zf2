@@ -21,6 +21,8 @@ use OldTown\Workflow\ZF2\ServiceEngine\Workflow;
 use OldTown\Workflow\ZF2\Event\WorkflowManagerEvent;
 
 
+
+
 /**
  * Class PluginMessageAbstractFactory
  *
@@ -29,13 +31,6 @@ use OldTown\Workflow\ZF2\Event\WorkflowManagerEvent;
 class AbstractWorkflowFactory implements AbstractFactoryInterface, MutableCreationOptionsInterface
 {
     use MutableCreationOptionsTrait;
-
-    /**
-     * Префикс с которого должно начинаться имя сервиса
-     *
-     * @var string
-     */
-    const SERVICE_NAME_PREFIX = 'workflow.manager.';
 
     /**
      * Имя опции через которое можно указать класс для создания конфиа для workflow
@@ -52,15 +47,43 @@ class AbstractWorkflowFactory implements AbstractFactoryInterface, MutableCreati
     protected $workflowConfigurationName = ArrayConfiguration::class;
 
     /**
+     * Префикс с которого начинаются имена сервисов являющихся менеджерами wf
+     *
+     * @var string
+     */
+    protected $workflowServiceNamePrefix;
+
+    /**
+     * Получает префикс с которого начинаются имена сервисов являющихся менеджерами wf
+     *
+     * @param ServiceLocatorInterface $serviceLocator
+     *
+     * @return string
+     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
+     */
+    protected function buildWorkflowServiceNamePrefix(ServiceLocatorInterface $serviceLocator)
+    {
+        /** @var ModuleOptions $moduleOptions */
+        $moduleOptions = $serviceLocator->get(ModuleOptions::class);
+
+        return $moduleOptions->getWorkflowServiceNamePrefix();
+    }
+
+    /**
      * @param ServiceLocatorInterface $serviceLocator
      * @param                         $name
      * @param                         $requestedName
      *
      * @return bool
+     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
      */
     public function canCreateServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
     {
-        $flag = 0 === strpos($requestedName, static::SERVICE_NAME_PREFIX) && strlen($requestedName) > strlen(static::SERVICE_NAME_PREFIX);
+        if (null === $this->workflowServiceNamePrefix) {
+            $this->workflowServiceNamePrefix = $this->buildWorkflowServiceNamePrefix($serviceLocator);
+        }
+
+        $flag = 0 === strpos($requestedName, $this->workflowServiceNamePrefix) && strlen($requestedName) > strlen($this->workflowServiceNamePrefix);
         return $flag;
     }
 
@@ -70,12 +93,17 @@ class AbstractWorkflowFactory implements AbstractFactoryInterface, MutableCreati
      * @param                         $requestedName
      *
      * @return WorkflowInterface
+     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
      *
      * @throws \OldTown\Workflow\ZF2\Factory\Exception\FactoryException
      */
     public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
     {
-        $managerName = substr($requestedName, strlen(static::SERVICE_NAME_PREFIX));
+        if (null === $this->workflowServiceNamePrefix) {
+            $this->workflowServiceNamePrefix = $this->buildWorkflowServiceNamePrefix($serviceLocator);
+        }
+
+        $managerName = substr($requestedName, strlen($this->workflowServiceNamePrefix));
 
         try {
             $creationOptions = $this->getCreationOptions();

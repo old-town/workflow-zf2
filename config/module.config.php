@@ -8,6 +8,9 @@ namespace OldTown\Workflow\ZF2;
 
 $config = [
     'workflow_zf2'    => [
+        'workflowServiceNamePrefix' => 'workflow.manager.',
+        'workflowManagerServiceNamePattern' => 'workflow.manager.%s',
+
         'configurations' => [
 
         ],

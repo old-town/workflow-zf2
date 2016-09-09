@@ -15,6 +15,20 @@ use Zend\Stdlib\AbstractOptions;
 class ModuleOptions extends AbstractOptions
 {
     /**
+     * Префикс с которого начинаются имена сервисов являющихся менеджерами wf
+     *
+     * @var string
+     */
+    protected $workflowServiceNamePrefix = 'workflow.manager.';
+
+    /**
+     * Паттерн для получения имени сервиса workflow
+     *
+     * @var string
+     */
+    protected $workflowManagerServiceNamePattern = 'workflow.manager.%s';
+
+    /**
      * Менеджеры workflow
      *
      * @var  array
@@ -137,5 +151,53 @@ class ModuleOptions extends AbstractOptions
         }
 
         return new ConfigurationOptions($this->configurations[$configurationName]);
+    }
+
+    /**
+     * Префикс с которого начинаются имена сервисов являющихся менеджерами wf
+     *
+     * @return string
+     */
+    public function getWorkflowServiceNamePrefix()
+    {
+        return $this->workflowServiceNamePrefix;
+    }
+
+    /**
+     * Префикс с которого начинаются имена сервисов являющихся менеджерами wf
+     *
+     * @param string $workflowServiceNamePrefix
+     *
+     * @return $this
+     */
+    public function setWorkflowServiceNamePrefix($workflowServiceNamePrefix)
+    {
+        $this->workflowServiceNamePrefix = $workflowServiceNamePrefix;
+
+        return $this;
+    }
+
+    /**
+     * Паттерн для получения имени сервиса workflow
+     *
+     * @return string
+     */
+    public function getWorkflowManagerServiceNamePattern()
+    {
+        return $this->workflowManagerServiceNamePattern;
+    }
+
+    /**
+     * Паттерн для получения имени сервиса workflow
+     *
+     * @param string $workflowManagerServiceNamePattern
+     *
+     * @return $this
+     */
+    public function setWorkflowManagerServiceNamePattern($workflowManagerServiceNamePattern)
+    {
+        $this->workflowManagerServiceNamePattern = $workflowManagerServiceNamePattern;
+
+        return $this;
     }
 }

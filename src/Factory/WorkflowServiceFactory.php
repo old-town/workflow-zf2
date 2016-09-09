@@ -12,7 +12,6 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 use OldTown\Workflow\ZF2\ServiceEngine\Workflow;
 use OldTown\Workflow\ZF2\Options\ModuleOptions;
 
-
 /**
  * Class WorkflowServiceFactory
  *
@@ -44,6 +43,14 @@ class WorkflowServiceFactory implements FactoryInterface, MutableCreationOptions
             'moduleOptions'  => $moduleOptions
         ];
 
-        return new Workflow($options);
+        $wf = new Workflow($options);
+
+        /** @var ModuleOptions $moduleOptions */
+        $moduleOptions = $serviceLocator->get(ModuleOptions::class);
+
+        $wf->setWorkflowManagerServiceNamePattern($moduleOptions->getWorkflowManagerServiceNamePattern());
+
+
+        return $wf;
     }
 }
