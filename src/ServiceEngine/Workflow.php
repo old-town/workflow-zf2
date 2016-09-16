@@ -157,18 +157,14 @@ class Workflow implements WorkflowServiceInterface
      * @param $managerName
      * @param $entryId
      *
-     * @return array|ActionDescriptor[]
-     *
-     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidManagerNameException
-     * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
-     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidWorkflowManagerException
-     * @throws \OldTown\Workflow\Exception\ArgumentNotNumericException
+     * @param TransientVarsInterface $inputs
+     * @return array|\OldTown\Workflow\Loader\ActionDescriptor[]
      */
-    public function getAvailableActions($managerName, $entryId)
+    public function getAvailableActions($managerName, $entryId, TransientVarsInterface $inputs = null)
     {
         /** @var AbstractWorkflow $manager */
         $manager = $this->getWorkflowManager($managerName);
-        $actionIds = $manager->getAvailableActions($entryId, new BaseTransientVars());
+        $actionIds = $manager->getAvailableActions($entryId, $inputs);
 
         $entry = $manager->getConfiguration()->getWorkflowStore()->findEntry($entryId);
         $workflowName = $entry->getWorkflowName();
