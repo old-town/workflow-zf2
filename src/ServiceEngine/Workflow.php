@@ -5,6 +5,7 @@
  */
 namespace OldTown\Workflow\ZF2\ServiceEngine;
 
+use OldTown\Workflow\AbstractWorkflow;
 use OldTown\Workflow\Loader\WorkflowDescriptor;
 use OldTown\Workflow\TransientVars\TransientVarsInterface;
 use OldTown\Workflow\WorkflowInterface;
@@ -165,8 +166,9 @@ class Workflow implements WorkflowServiceInterface
      */
     public function getAvailableActions($managerName, $entryId)
     {
+        /** @var AbstractWorkflow $manager */
         $manager = $this->getWorkflowManager($managerName);
-        $currentSteps = $manager->getCurrentSteps($entryId);
+        $actionIds = $manager->getAvailableActions($entryId, new BaseTransientVars());
 
         $entry = $manager->getConfiguration()->getWorkflowStore()->findEntry($entryId);
         $workflowName = $entry->getWorkflowName();
@@ -174,14 +176,8 @@ class Workflow implements WorkflowServiceInterface
         $wf = $manager->getConfiguration()->getWorkflow($workflowName);
 
         $findActions = [];
-        foreach ($currentSteps as $currentStep) {
-            $stepId = $currentStep->getStepId();
-            $step = $wf->getStep($stepId);
-            $actions = $step->getActions();
-
-            foreach ($actions as $action) {
-                $findActions[] = $action;
-            }
+        foreach ($actionIds as $actionId) {
+            $findActions[] = $wf->getAction($actionId);
         }
 
         return $findActions;
