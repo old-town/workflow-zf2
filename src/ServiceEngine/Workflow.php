@@ -118,7 +118,7 @@ class Workflow implements WorkflowServiceInterface
             $event->setWorkflow($wf);
 
             //$action = $this->getActionByName($wf, $actionName);
-            $action = $this->findActionByNameForEntry($managerName, $entryId, $actionName);
+            $action = $this->findActionByNameForEntry($managerName, $entryId, $actionName, $transientVars);
 
 
             $actionId = $action->getId();
@@ -154,21 +154,27 @@ class Workflow implements WorkflowServiceInterface
     /**
      * Возвращает доступные действия для текущего состояния процесса
      *
-     * @param $managerName
-     * @param $entryId
+     * @param                        $managerName
+     * @param                        $entryId
      *
-     * @return array|ActionDescriptor[]
+     * @param TransientVarsInterface $transientVars
      *
-     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidManagerNameException
+     * @return array|\OldTown\Workflow\Loader\ActionDescriptor[]
+     * @throws \OldTown\Workflow\Exception\WorkflowException
+     * @throws \OldTown\Workflow\Exception\StoreException
+     * @throws \OldTown\Workflow\Exception\InvalidArgumentException
+     * @throws \OldTown\Workflow\Exception\InternalWorkflowException
+     * @throws \OldTown\Workflow\Exception\FactoryException
      * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
      * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidWorkflowManagerException
-     * @throws \OldTown\Workflow\Exception\ArgumentNotNumericException
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidManagerNameException
      */
-    public function getAvailableActions($managerName, $entryId)
+    public function getAvailableActions($managerName, $entryId, TransientVarsInterface $transientVars = null)
     {
         /** @var AbstractWorkflow $manager */
         $manager = $this->getWorkflowManager($managerName);
-        $actionIds = $manager->getAvailableActions($entryId, new BaseTransientVars());
+
+        $actionIds = $manager->getAvailableActions($entryId, $transientVars);
 
         $entry = $manager->getConfiguration()->getWorkflowStore()->findEntry($entryId);
         $workflowName = $entry->getWorkflowName();
@@ -187,22 +193,27 @@ class Workflow implements WorkflowServiceInterface
     /**
      * Ишет действие по имени. Поиск происходит в рамках текущего step'a.
      *
-     * @param $managerName
-     * @param $entryId
-     * @param $actionName
+     * @param                        $managerName
+     * @param                        $entryId
+     * @param                        $actionName
      *
-     * @return ActionDescriptor|null
+     * @param TransientVarsInterface $transientVars
      *
-     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidManagerNameException
+     * @return null|ActionDescriptor
+     * @throws \OldTown\Workflow\Exception\WorkflowException
+     * @throws \OldTown\Workflow\Exception\StoreException
+     * @throws \OldTown\Workflow\Exception\InvalidArgumentException
+     * @throws \OldTown\Workflow\Exception\InternalWorkflowException
+     * @throws \OldTown\Workflow\Exception\FactoryException
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidWorkflowActionNameException
      * @throws \Zend\ServiceManager\Exception\ServiceNotFoundException
      * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidWorkflowManagerException
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidManagerNameException
      * @throws \OldTown\Workflow\Exception\ArgumentNotNumericException
-     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\InvalidWorkflowActionNameException
-     * @throws \OldTown\Workflow\Exception\FactoryException
      */
-    public function findActionByNameForEntry($managerName, $entryId, $actionName)
+    public function findActionByNameForEntry($managerName, $entryId, $actionName, TransientVarsInterface $transientVars = null)
     {
-        $actions = $this->getAvailableActions($managerName, $entryId);
+        $actions = $this->getAvailableActions($managerName, $entryId, $transientVars);
         $findActions = [];
         foreach ($actions as $action) {
             if ($actionName === $action->getName()) {
