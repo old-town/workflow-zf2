@@ -22,7 +22,8 @@
     "zendframework/zend-view": "~2.4.0",
     "zendframework/zend-stdlib": "~2.4.0",
     "zendframework/zend-servicemanager": "~2.4.0",
-    "zendframework/zend-modulemanager": "~2.4.0"
+    "zendframework/zend-modulemanager": "~2.4.0",
+    "ramsey/uuid": "~3.5.0"
   },
   "require-dev": {
     "fabpot/php-cs-fixer": "~1.11.0",

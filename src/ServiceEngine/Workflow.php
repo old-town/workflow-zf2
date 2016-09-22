@@ -9,6 +9,8 @@ use OldTown\Workflow\AbstractWorkflow;
 use OldTown\Workflow\Loader\WorkflowDescriptor;
 use OldTown\Workflow\TransientVars\TransientVarsInterface;
 use OldTown\Workflow\WorkflowInterface;
+use OldTown\Workflow\ZF2\Event\DoActionTransactionEvent;
+use OldTown\Workflow\ZF2\Event\InitializeTransactionEvent;
 use Zend\EventManager\EventManagerAwareTrait;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Traversable;
@@ -19,6 +21,7 @@ use OldTown\Workflow\ZF2\ServiceEngine\Workflow\TransitionResult;
 use OldTown\Workflow\ZF2\ServiceEngine\Workflow\TransitionResultInterface;
 use OldTown\Workflow\ZF2\Options\ModuleOptions;
 use OldTown\Workflow\Loader\ActionDescriptor;
+use OldTown\Workflow\ZF2\Transaction\WorkflowTransactionInterface;
 
 /**
  * Class Workflow
@@ -42,6 +45,15 @@ class Workflow implements WorkflowServiceInterface
      * @var ModuleOptions
      */
     protected $moduleOptions;
+
+    /**
+     * Контекст событий
+     *
+     * @var array
+     */
+    protected $eventIdentifier = [
+        WorkflowTransactionInterface::class
+    ];
 
     /**
      * @param $options
@@ -101,7 +113,14 @@ class Workflow implements WorkflowServiceInterface
      */
     public function doAction($managerName, $entryId, $actionName, TransientVarsInterface $transientVars = null)
     {
+        $transactionEvent = new DoActionTransactionEvent($managerName, $entryId, $actionName);
+        $transactionEvent->setTarget($this);
+
         try {
+            $transactionEvent->setName(DoActionTransactionEvent::START_TRANSACTION);
+            $this->getEventManager()->trigger($transactionEvent);
+
+
             $event = new WorkflowEvent();
             $event->setTarget($this);
             $event->setEntryId($entryId);
@@ -139,14 +158,22 @@ class Workflow implements WorkflowServiceInterface
                 $event->setName(WorkflowEvent::EVENT_RENDER);
                 $this->getEventManager()->trigger($event);
             }
+
+
+            $result = new TransitionResult($entryId, $manager, $wf, $transientVars);
+            if ($viewName) {
+                $result->setViewName($viewName);
+            }
+
+            $transactionEvent->setName(DoActionTransactionEvent::COMMIT_TRANSACTION);
+            $this->getEventManager()->trigger($transactionEvent);
         } catch (\Exception $e) {
+            $transactionEvent->setName(DoActionTransactionEvent::ROLLBACK_TRANSACTION);
+            $this->getEventManager()->trigger($transactionEvent);
+
             throw new Exception\DoActionException($e->getMessage(), $e->getCode(), $e);
         }
 
-        $result = new TransitionResult($entryId, $manager, $wf, $transientVars);
-        if ($viewName) {
-            $result->setViewName($viewName);
-        }
 
         return $result;
     }
@@ -258,7 +285,12 @@ class Workflow implements WorkflowServiceInterface
      */
     public function initialize($managerName, $workflowName, $actionName, TransientVarsInterface $transientVars = null)
     {
+        $transactionEvent = new InitializeTransactionEvent($managerName, $workflowName, $actionName);
+        $transactionEvent->setTarget($this);
         try {
+            $transactionEvent->setName(InitializeTransactionEvent::START_TRANSACTION);
+            $this->getEventManager()->trigger($transactionEvent);
+
             $event = new WorkflowEvent();
             $event->setTarget($this);
 
@@ -299,14 +331,22 @@ class Workflow implements WorkflowServiceInterface
                 $event->setName(WorkflowEvent::EVENT_RENDER);
                 $this->getEventManager()->trigger($event);
             }
+
+            $result = new TransitionResult($entryId, $manager, $wf, $transientVars);
+            if ($viewName) {
+                $result->setViewName($viewName);
+            }
+
+            $transactionEvent->setName(InitializeTransactionEvent::COMMIT_TRANSACTION);
+            $this->getEventManager()->trigger($transactionEvent);
         } catch (\Exception $e) {
+            $transactionEvent->setName(InitializeTransactionEvent::ROLLBACK_TRANSACTION);
+            $this->getEventManager()->trigger($transactionEvent);
+
             throw new Exception\InvalidInitializeWorkflowEntryException($e->getMessage(), $e->getCode(), $e);
         }
 
-        $result = new TransitionResult($entryId, $manager, $wf, $transientVars);
-        if ($viewName) {
-            $result->setViewName($viewName);
-        }
+
 
         return $result;
     }
@@ -325,6 +365,7 @@ class Workflow implements WorkflowServiceInterface
      * Устанавливает конфигурацию модуля
      *
      * @param ModuleOptions $moduleOptions
+     *
      *
      * @return $this
      */
