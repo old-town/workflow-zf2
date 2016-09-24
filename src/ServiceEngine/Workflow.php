@@ -1,12 +1,13 @@
 <?php
 /**
- * @link https://github.com/old-town/workflow-zf2
+ * @link    https://github.com/old-town/workflow-zf2
  * @author  Malofeykin Andrey  <and-rey2@yandex.ru>
  */
 namespace OldTown\Workflow\ZF2\ServiceEngine;
 
 use OldTown\Workflow\AbstractWorkflow;
 use OldTown\Workflow\Loader\WorkflowDescriptor;
+use OldTown\Workflow\Spi\WorkflowEntryInterface;
 use OldTown\Workflow\TransientVars\TransientVarsInterface;
 use OldTown\Workflow\WorkflowInterface;
 use OldTown\Workflow\ZF2\Event\DoActionTransactionEvent;
@@ -131,6 +132,12 @@ class Workflow implements WorkflowServiceInterface
             $workflowStore = $manager->getConfiguration()->getWorkflowStore();
 
             $entry = $workflowStore->findEntry($entryId);
+            if (null === $entry) {
+                $errMsg = sprintf('Entry id %s not found', $entryId);
+                throw new Exception\InvalidArgumentException($errMsg);
+            }
+
+
             $workflowName = $entry->getWorkflowName();
 
             $wf = $manager->getConfiguration()->getWorkflow($workflowName);
@@ -138,6 +145,15 @@ class Workflow implements WorkflowServiceInterface
 
             //$action = $this->getActionByName($wf, $actionName);
             $action = $this->findActionByNameForEntry($managerName, $entryId, $actionName, $transientVars);
+
+            if (null === $action) {
+                try {
+                    $errMsg = $this->generateTxtActionNotFoundException($manager, $entry, $actionName);
+                } catch (\Exception $e) {
+                    $errMsg = sprintf('Invalid action %s', $actionName);
+                }
+                throw new Exception\RuntimeException($errMsg);
+            }
 
 
             $actionId = $action->getId();
@@ -176,6 +192,50 @@ class Workflow implements WorkflowServiceInterface
 
 
         return $result;
+    }
+
+    /**
+     * Генерация сообщения о ошибке, для ситуации когда не найдено действие
+     *
+     * @param WorkflowInterface      $wfManager
+     * @param WorkflowEntryInterface $entry
+     * @param                        $actionName
+     *
+     * @throws \OldTown\Workflow\Exception\ArgumentNotNumericException
+     * @throws \OldTown\Workflow\ZF2\ServiceEngine\Exception\RuntimeException
+     *
+     * @return string
+     */
+    protected function generateTxtActionNotFoundException(WorkflowInterface $wfManager, WorkflowEntryInterface $entry, $actionName)
+    {
+        $workflowStore = $wfManager->getConfiguration()->getWorkflowStore();
+        $wf = $wfManager->getConfiguration()->getWorkflow($entry->getWorkflowName());
+
+        $currentSteps = $workflowStore->findCurrentSteps($entry->getId());
+
+        $stepInfo = [];
+        foreach ($currentSteps as $currentStep) {
+            $stepId = $currentStep->getStepId();
+            $step = $wf->getStep($stepId);
+
+            if (null === $step) {
+                $errMsg = sprintf('Step with id %s not found', $stepId);
+                throw new  Exception\RuntimeException($errMsg);
+            }
+
+            $stepName = $step->getName();
+            $stepInfo[] = sprintf('%s[status="%s"](stepId="%s")', $stepName, $currentStep->getStatus(), $stepId);
+        }
+
+        $errMsg = sprintf(
+            'Current steps %s of workflow process(name="%s",entryId="%s") is not "%s" action',
+            implode(',', $stepInfo),
+            $entry->getWorkflowName(),
+            $entry->getId(),
+            $actionName
+        );
+
+        return $errMsg;
     }
 
     /**
@@ -267,6 +327,7 @@ class Workflow implements WorkflowServiceInterface
             reset($findActions);
             $findAction = current($findActions);
         }
+
         return $findAction;
     }
 
@@ -377,7 +438,6 @@ class Workflow implements WorkflowServiceInterface
     }
 
 
-
     /**
      * Получение менеджера workflow по имени
      *
@@ -397,7 +457,7 @@ class Workflow implements WorkflowServiceInterface
         }
         $workflowManagerServiceName = $this->getWorkflowManagerServiceName($managerName);
 
-        $manager =  $this->getServiceLocator()->get($workflowManagerServiceName);
+        $manager = $this->getServiceLocator()->get($workflowManagerServiceName);
 
         if (!$manager instanceof WorkflowInterface) {
             $errMsg = sprintf('Workflow manager not implement %s', WorkflowInterface::class);
@@ -406,8 +466,6 @@ class Workflow implements WorkflowServiceInterface
 
         return $manager;
     }
-
-
 
 
     /**
@@ -521,6 +579,7 @@ class Workflow implements WorkflowServiceInterface
     public function hasWorkflowManagerAlias($alias)
     {
         $aliasMap = $this->getModuleOptions()->getManagerAliases();
+
         return array_key_exists($alias, $aliasMap);
     }
 
@@ -539,6 +598,7 @@ class Workflow implements WorkflowServiceInterface
     public function getWorkflowManagerByAlias($alias)
     {
         $name = $this->getManagerNameByAlias($alias);
+
         return $this->getWorkflowManager($name);
     }
 }
